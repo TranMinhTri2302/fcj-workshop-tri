@@ -1,12 +1,10 @@
 ---
-
 title: "FCAJ Community Day - June 2026"
 date: 2026-06-01
 weight: 1
 chapter: false
 pre: " <b> 4.1. </b> "
 ----------------------
-
 
 # Summary Report: “FCAJ Community Day - June 2026”
 
@@ -157,7 +155,10 @@ The open Q&A format allowed participants to ask practical questions. My question
 * Security and FinOps should be included from the beginning of system design.
 
 #### Some event photos
-
-*Add your event photos or screenshots here.*
+![Event 1-1](/images/4-EventParticipated/EV1-1.png)
+![Event 1-2](/images/4-EventParticipated/EV1-2.png)
+![Event 1-3](/images/4-EventParticipated/EV1-3.png)
+![Event 1-4](/images/4-EventParticipated/EV1-4.png)
+![Event 1-5](/images/4-EventParticipated/EV1-5.png)
 
 > Overall, FCAJ Community Day helped me gain a more practical understanding of how AI and cloud technologies are used in real enterprise systems. The event also strengthened my awareness of system complexity, secure architecture, FinOps, and the importance of human decision-making in the AI era.
