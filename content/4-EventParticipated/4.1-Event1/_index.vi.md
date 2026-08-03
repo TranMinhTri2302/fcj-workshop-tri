@@ -12,7 +12,7 @@ pre: " <b> 4.1. </b> "
 
 - **Tên sự kiện:** FCAJ Community Day - June 2026  
 - **Thời gian:** 9:00 sáng 27/06/2026  
-- **Địa điểm:** Sự kiện offline, ghi chú tham gia tại tầng 26/36  
+- **Địa điểm:** Sự kiện offline, tham gia tại tầng 26 tòa nhà Bitexco
 - **Vai trò:** Người tham dự, lắng nghe chia sẻ và đặt câu hỏi trong phần thảo luận  
 
 ### Mục tiêu sự kiện
