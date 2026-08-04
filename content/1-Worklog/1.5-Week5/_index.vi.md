@@ -1,59 +1,45 @@
 ---
 title: "Worklog Tuần 5"
 date: 2024-01-01
-weight: 1
+weight: 5
 chapter: false
 pre: " <b> 1.5. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
+
 
 
 ### Mục tiêu tuần 5:
 
-* Kết nối, làm quen với các thành viên trong First Cloud AI Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+* Triển khai module Tasks theo kiến trúc tách lớp và tối ưu hóa truy vấn DynamoDB bằng GSI và cursor-based pagination.
+* Bổ sung các rule nghiệp vụ quan trọng như auto-assign, phân quyền theo vai trò và gửi thông báo theo từng trạng thái.
+* Tích hợp AI bằng Amazon Rekognition vào luồng điểm danh khuôn mặt để nâng cao trải nghiệm người dùng.
+* Nâng cao chất lượng kiểm thử tự động và hoàn thiện pipeline CI/CD để hệ thống sẵn sàng cho các giai đoạn phát triển tiếp theo.
 
 ### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCAJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-
+| Thứ | Công việc | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu |
+| --- | --- | --- | --- | --- |
+| 2 | - Triển khai module Tasks và thiết kế bảng DynamoDB với GSI `assignee_id-status-index` để truy vấn nhanh hơn | 20/07/2026 | 20/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 3 | - Hoàn thiện cơ chế phân trang cursor cho DynamoDB <br> - Xây dựng các rule nghiệp vụ như auto-assign, phân quyền và thông báo theo trạng thái | 21/07/2026 | 21/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 4 | - Tích hợp Amazon Rekognition để xây dựng API đăng ký khuôn mặt và API check-in bằng SearchFacesByImage | 22/07/2026 | 22/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 5 | - Áp dụng ràng buộc thời gian cho điểm danh khuôn mặt <br> - Nâng cao kiểm thử tự động với moto cho Rekognition, DynamoDB và SES | 23/07/2026 | 23/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 6 | - Cập nhật pipeline CI/CD trên GitHub Actions để chạy toàn bộ bộ test mới | 24/07/2026 | 24/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 7 | - Tổng kết tuần: tối ưu hóa thiết kế NoSQL, tích hợp AI vào luồng nghiệp vụ thực tế và củng cố phân quyền | 25/07/2026 | 25/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
 
 ### Kết quả đạt được tuần 5:
 
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
+* **Module Tasks và tối ưu DynamoDB:**
+  * Triển khai module Tasks theo kiến trúc tách lớp, chuẩn hóa cấu hình tên bảng DynamoDB qua biến settings để dễ bảo trì.
+  * Thiết kế bảng Tasks với GSI `assignee_id-status-index`, giúp truy vấn theo assignee và status hiệu quả hơn, đồng thời giảm thiểu việc sử dụng scan.
+  * Hoàn thiện cơ chế phân trang theo cursor cho DynamoDB, phù hợp hơn với đặc thù NoSQL so với mô hình offset/limit truyền thống.
 
-* Đã tạo và cấu hình AWS Free Tier account thành công.
+* **Nghiệp vụ và tích hợp AI:**
+  * Bổ sung các rule nghiệp vụ như auto-assign, phân quyền theo vai trò và gửi thông báo ở từng mốc trạng thái.
+  * Tích hợp Amazon Rekognition vào luồng điểm danh khuôn mặt, bao gồm đăng ký khuôn mặt, check-in và xử lý các trường hợp như không phát hiện khuôn mặt hoặc chất lượng ảnh thấp.
 
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
+* **Kiểm thử và CI/CD:**
+  * Nâng cao chất lượng kiểm thử tự động bằng unit test và integration test, sử dụng moto để mô phỏng Rekognition, DynamoDB và SES.
+  * Cập nhật pipeline CI/CD trên GitHub Actions để chạy đầy đủ bộ test mới.
+  * Hiểu sâu hơn về thiết kế GSI theo access pattern, cơ chế cursor pagination và tầm quan trọng của phân quyền kết hợp với thông báo trong hệ thống thực tế.
 
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
-
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
 
 

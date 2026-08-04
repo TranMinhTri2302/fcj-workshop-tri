@@ -1,59 +1,46 @@
 ---
 title: "Worklog Tuần 3"
 date: 2024-01-01
-weight: 1
+weight: 3
 chapter: false
 pre: " <b> 1.3. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
+
 
 
 ### Mục tiêu tuần 3:
 
-* Kết nối, làm quen với các thành viên trong First Cloud AI Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+* Cập nhật và hoàn thiện sơ đồ kiến trúc hệ thống, chính thức chọn đề tài Smart Campus và xác định Python (FastAPI) làm nền tảng cho backend.
+* Tái cấu trúc workflow, phân chia rõ trách nhiệm giữa các service và định nghĩa chi tiết vai trò của từng thành phần trong hệ thống.
+* Nghiên cứu sâu hơn về thiết kế mạng public/private, quản lý secret bằng AWS Secrets Manager và tiếp tục hoàn thiện bộ tài liệu kỹ thuật.
 
 ### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCAJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-
+| Thứ | Công việc | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu |
+| --- | --- | --- | --- | --- |
+| 2 | - Hoàn thiện và cập nhật lại kiến trúc hệ thống dựa trên các góp ý từ các đợt phản hồi trước đó | 06/07/2026 | 06/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 3 | - Chính thức chọn đề tài **Smart Campus** và sử dụng **Python (FastAPI)** cho backend để phù hợp với hướng tiếp cận serverless và microservices | 07/07/2026 | 07/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 4 | - Xây dựng lại flow hệ thống rõ ràng hơn, phân tách chức năng các service và xác định vai trò của từng thành phần | 08/07/2026 | 08/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 5 | - **Nghiên cứu sâu hơn về kiến trúc AWS:** <br>&emsp; + Thiết kế hệ thống public/private, quản lý networking và bảo mật <br>&emsp; + Quản lý secrets bằng AWS Secrets Manager để tránh hard-code credentials | 09/07/2026 | 09/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 6 | - **Áp dụng kiến thức từ sự kiện và lab:** <br>&emsp; + Hiểu rõ hơn về cách AI và DevOps hỗ trợ vận hành hệ thống <br>&emsp; + Nhận thức về sự đánh đổi giữa chi phí, hiệu năng và bảo mật khi thiết kế cloud | 10/07/2026 | 10/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 7 | - Tiếp tục hoàn thiện tài liệu mô tả hệ thống như architecture diagram, workflow và use case để chuẩn bị cho các giai đoạn phát triển tiếp theo | 11/07/2026 | 11/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
 
 ### Kết quả đạt được tuần 3:
 
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
+* **Chốt đề tài và tech stack backend:**
+  * Hoàn thiện và cập nhật lại kiến trúc hệ thống dựa trên các góp ý trước đó.
+  * Chính thức lựa chọn đề tài Smart Campus và dùng Python (FastAPI) cho backend để phù hợp với định hướng serverless và microservices.
 
-* Đã tạo và cấu hình AWS Free Tier account thành công.
+* **Tái thiết kế flow và phân tách service:**
+  * Xây dựng lại flow hệ thống rõ ràng hơn, phân chia chức năng giữa các service và làm rõ vai trò của từng thành phần.
 
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
+* **Chuyên sâu về kiến trúc mạng và bảo mật AWS:**
+  * Nghiên cứu cách thiết kế hệ thống public/private, quản lý networking và bảo mật hiệu quả.
+  * Áp dụng AWS Secrets Manager để quản lý thông tin bí mật thay vì hard-code credentials trong source code.
 
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
+* **Tư duy kiến trúc và tài liệu hóa:**
+  * Hiểu rõ hơn về cách AI và DevOps hỗ trợ vận hành hệ thống.
+  * Nhận thức sâu sắc hơn về sự đánh đổi giữa chi phí, hiệu năng và bảo mật khi thiết kế cloud.
+  * Tiếp tục hoàn thiện các tài liệu mô tả hệ thống để chuẩn bị cho các giai đoạn phát triển tiếp theo.
 
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
 
 

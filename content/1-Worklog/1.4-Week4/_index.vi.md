@@ -1,59 +1,46 @@
 ---
 title: "Worklog Tuần 4"
 date: 2024-01-01
-weight: 1
+weight: 4
 chapter: false
 pre: " <b> 1.4. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
+
 
 
 ### Mục tiêu tuần 4:
 
-* Kết nối, làm quen với các thành viên trong First Cloud AI Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+* Triển khai dự án Smart Campus bằng Python/FastAPI, xây dựng cấu trúc module hóa rõ ràng với các thành phần routers, services, models và schemas.
+* Xây dựng hệ thống xác thực người dùng thông qua Amazon Cognito, bao gồm các flow đăng ký, đăng nhập, xác nhận tài khoản và middleware giải mã JWT.
+* Thiết kế cơ sở dữ liệu DynamoDB cho các thực thể Users, Events và Checkins, đồng thời tích hợp S3 thông qua presigned URL để tối ưu hóa quá trình upload ảnh.
+* Thiết lập giám sát bằng CloudWatch và xây dựng quy trình CI/CD với GitHub Actions nhằm nâng cao chất lượng và độ tin cậy của hệ thống.
 
 ### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCAJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-
+| Thứ | Công việc | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu |
+| --- | --- | --- | --- | --- |
+| 2 | - Triển khai dự án Smart Campus bằng Python/FastAPI, tổ chức code theo từng module rõ ràng (routers, services, models, schemas) | 13/07/2026 | 13/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 3 | - Xây dựng chức năng xác thực qua Amazon Cognito, hoàn thiện flow đăng ký – đăng nhập – xác nhận và viết middleware giải mã JWT tự động | 14/07/2026 | 14/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 4 | - Kết nối DynamoDB bằng boto3 để tạo các bảng Users, Events, Checkins và thiết lập GSI cho truy vấn lịch sử điểm danh | 15/07/2026 | 15/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 5 | - Phát triển các API quản lý sự kiện và điểm danh, đồng thời triển khai cơ chế chống trùng lặp bằng ConditionExpression | 16/07/2026 | 16/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 6 | - Tích hợp S3 thông qua presigned URL cho phép client upload ảnh trực tiếp <br> - Cấu hình CloudWatch để thu log và tạo alarm khi lỗi vượt ngưỡng <br> - Xây dựng CI/CD trên GitHub Actions với pytest, lint và moto | 17/07/2026 | 17/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 7 | - Tổng kết tuần: nắm vững hơn về JWT/OIDC trong Cognito, thiết kế dữ liệu NoSQL và quy trình CI/CD thực tế | 18/07/2026 | 18/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
 
 ### Kết quả đạt được tuần 4:
 
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
+* **Phát triển backend bằng Python/FastAPI:**
+  * Triển khai dự án Smart Campus với cấu trúc module hóa để hệ thống dễ bảo trì và mở rộng hơn.
 
-* Đã tạo và cấu hình AWS Free Tier account thành công.
+* **Xây dựng hệ thống xác thực với Cognito:**
+  * Hoàn thiện toàn bộ flow đăng ký – đăng nhập – xác nhận và triển khai middleware giải mã JWT để tự động bảo vệ các route cần xác thực.
 
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
+* **Kết nối database và lưu trữ:**
+  * Kết nối DynamoDB cho các bảng Users, Events và Checkins, thiết lập Global Secondary Index giúp truy vấn lịch sử điểm danh theo user hiệu quả hơn.
+  * Tích hợp S3 bằng presigned URL để client có thể upload ảnh trực tiếp, giảm tải cho backend.
 
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
+* **Giám sát và CI/CD:**
+  * Cấu hình CloudWatch để thu thập log và phát cảnh báo khi tỉ lệ lỗi vượt ngưỡng.
+  * Xây dựng quy trình CI/CD bằng GitHub Actions để tự động chạy pytest và lint, đồng thời sử dụng moto để mock DynamoDB và Cognito trong kiểm thử.
+  * Nắm vững hơn về JWT/OIDC trong Cognito, cách thiết kế dữ liệu NoSQL hiệu quả và quy trình CI/CD trong môi trường phát triển thực tế.
 
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
 
 

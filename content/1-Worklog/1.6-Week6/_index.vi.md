@@ -1,58 +1,48 @@
 ---
 title: "Worklog Tuần 6"
 date: 2024-01-01
-weight: 1
+weight: 6
 chapter: false
 pre: " <b> 1.6. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
+
 
 
 ### Mục tiêu tuần 6:
 
-* Kết nối, làm quen với các thành viên trong First Cloud AI Journey.
-* Hiểu dịch vụ AWS cơ bản, cách dùng console & CLI.
+* Nâng cấp module Analytics/Reports và triển khai giao diện dashboard phân tích dữ liệu cho hệ thống.
+* Hoàn thiện cơ chế thông báo production bằng Amazon SES/SNS và chuẩn hóa định dạng dữ liệu notification.
+* Tích hợp Amazon Cognito vào luồng xác thực chính thức, hỗ trợ xử lý yêu cầu đổi mật khẩu lần đầu và khôi phục tài khoản bằng khuôn mặt.
+* Tham gia sự kiện AWS FCAJ Agent Forge – Deepdive để hiểu sâu hơn về kiến trúc Agentic AI và các nguyên tắc bảo mật nhiều lớp.
 
 ### Các công việc cần triển khai trong tuần này:
-| Thứ | Công việc                                                                                                                                                                                   | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu                            |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | --------------- | ----------------------------------------- |
-| 2   | - Làm quen với các thành viên FCAJ <br> - Đọc và lưu ý các nội quy, quy định tại đơn vị thực tập                                                                                             | 11/08/2025   | 11/08/2025      |
-| 3   | - Tìm hiểu AWS và các loại dịch vụ <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                            | 12/08/2025   | 12/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Tạo AWS Free Tier account <br> - Tìm hiểu AWS Console & AWS CLI <br> - **Thực hành:** <br>&emsp; + Tạo AWS account <br>&emsp; + Cài AWS CLI & cấu hình <br> &emsp; + Cách sử dụng AWS CLI | 13/08/2025   | 13/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Tìm hiểu EC2 cơ bản: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - Các cách remote SSH vào EC2 <br> - Tìm hiểu Elastic IP   <br>                  | 14/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Thực hành:** <br>&emsp; + Tạo EC2 instance <br>&emsp; + Kết nối SSH <br>&emsp; + Gắn EBS volume                                                                                         | 15/08/2025   | 15/08/2025      | <https://cloudjourney.awsstudygroup.com/> |
-
+| Thứ | Công việc | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu |
+| --- | --- | --- | --- | --- |
+| 2 | - Nâng cấp module Analytics/Reports bằng cách bổ sung endpoint và schema phục vụ dashboard phân tích, đồng thời hỗ trợ filter theo phòng ban | 27/07/2026 | 27/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 3 | - Triển khai trang Analytics trên frontend để trực quan hóa dữ liệu thống kê | 28/07/2026 | 28/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 4 | - Hoàn thiện cơ chế thông báo production: chuyển từ broadcast sang gửi email 1-1 bằng Amazon SES, có fallback sang SNS khi SES lỗi hoặc thiếu email | 29/07/2026 | 29/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 5 | - Tích hợp Amazon Cognito vào luồng xác thực chính thức: xử lý NEW_PASSWORD_REQUIRED, triển khai AuthContext và ProtectedRoute trên frontend | 30/07/2026 | 30/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 6 | - Phát triển tính năng khôi phục mật khẩu bằng khuôn mặt: backend nhận email và ảnh base64, xác minh qua Rekognition, rồi reset password trên Cognito | 31/07/2026 | 31/07/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 7 | - Tham gia sự kiện **AWS FCAJ Agent Forge – Deepdive (03/08/2026)** tại tầng 26 Bitexco; tìm hiểu Agentic AI, Bedrock Agent Core, Firecracker MicroVM, MCP/A2A, Guardrails và Human-in-the-loop | 03/08/2026 | 03/08/2026 | <https://cloudjourney.awsstudygroup.com/> <br> [Video workshop Agent Forge](https://www.youtube.com/watch?v=F58sam40jxk) |
+| 8 | - Tổng kết hiểu biết về thiết kế hệ thống Agentic AI, Human-in-the-loop và cách lựa chọn model phù hợp theo chi phí và hiệu năng | 01/08/2026 | 01/08/2026 | <https://cloudjourney.awsstudygroup.com/> |
 
 ### Kết quả đạt được tuần 6:
-* Hiểu AWS là gì và nắm được các nhóm dịch vụ cơ bản: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
 
-* Đã tạo và cấu hình AWS Free Tier account thành công.
+* **Nâng cấp Analytics và frontend:**
+  * Cải tiến module Analytics/Reports bằng cách bổ sung endpoint và schema phục vụ dashboard phân tích với khả năng filter theo phòng ban.
+  * Triển khai trang Analytics trên frontend để trực quan hóa dữ liệu thống kê cho người dùng.
 
-* Làm quen với AWS Management Console và biết cách tìm, truy cập, sử dụng dịch vụ từ giao diện web.
+* **Thông báo production và bảo mật dữ liệu:**
+  * Hoàn thiện cơ chế gửi thông báo theo hướng production: chuyển từ broadcast sang email cá nhân 1-1 bằng Amazon SES, đồng thời có cơ chế fallback tự động sang SNS khi SES gặp lỗi hoặc không có email hợp lệ.
+  * Chuẩn hóa định dạng dữ liệu notification theo chuẩn snake_case và đảm bảo tương thích với dữ liệu cũ.
 
-* Cài đặt và cấu hình AWS CLI trên máy tính bao gồm:
-  * Access Key
-  * Secret Key
-  * Region mặc định
-  * ...
+* **Xác thực và khôi phục tài khoản:**
+  * Tích hợp Amazon Cognito vào luồng xác thực chính thức, xử lý trường hợp NEW_PASSWORD_REQUIRED bằng API respond-to-auth-challenge.
+  * Triển khai AuthContext và ProtectedRoute trên frontend để bảo vệ các route cần đăng nhập.
+  * Phát triển tính năng khôi phục mật khẩu bằng khuôn mặt, trong đó backend nhận email và ảnh base64, xác minh danh tính qua Rekognition rồi thực hiện reset password trên Cognito.
 
-* Sử dụng AWS CLI để thực hiện các thao tác cơ bản như:
-
-  * Kiểm tra thông tin tài khoản & cấu hình
-  * Lấy danh sách region
-  * Xem dịch vụ EC2
-  * Tạo và quản lý key pair
-  * Kiểm tra thông tin dịch vụ đang chạy
-  * ...
-
-* Có khả năng kết nối giữa giao diện web và CLI để quản lý tài nguyên AWS song song.
-* ...
+* **Sự kiện và tư duy kiến trúc nâng cao:**
+  * Tham gia sự kiện AWS FCAJ Agent Forge – Deepdive, tìm hiểu sâu về Agentic AI, Bedrock Agent Core, Firecracker MicroVM, Token Vault, giao thức MCP/A2A, Gateway với Guardrails và Human-in-the-loop.
+  * Nắm rõ hơn về cách thiết kế hệ thống Agentic AI một cách bài bản, tầm quan trọng của Human-in-the-loop, các lớp bảo mật đa tầng và cách lựa chọn model phù hợp như Haiku, Sonnet và Opus để tối ưu chi phí và hiệu năng.
 
 
