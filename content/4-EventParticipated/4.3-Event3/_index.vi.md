@@ -1,7 +1,7 @@
 ---
 title: "AWS Workshop / Hands-on Lab về Agentic AI"
 date: 2026-08-03
-weight: 1
+weight: 3
 chapter: false
 pre: " <b> 4.3. </b> "
 ---

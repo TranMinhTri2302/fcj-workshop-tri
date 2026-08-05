@@ -11,7 +11,7 @@ pre: " <b> 4.1. </b> "
 ### Event Information
 
 * **Event name:** FCAJ Community Day - June 2026
-* **Time:** 09:00, June 27, 2026
+* **Time:** 09:00 AM, June 27, 2026
 * **Location:** Offline event, floor 26/36
 * **Role:** Attendee / Participant
 

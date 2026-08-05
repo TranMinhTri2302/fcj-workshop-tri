@@ -1,9 +1,9 @@
 ---
 title: "AWS FCAJ Agent Forge - Deepdive"
 date: 2026-08-03
-weight: 1
+weight: 2
 chapter: false
-pre: " <b> 4.1. </b> "
+pre: " <b> 4.2. </b> "
 ---
 
 # Summary Report: "AWS FCAJ Agent Forge - Deepdive"
