@@ -5,27 +5,64 @@ weight: 5
 chapter: false
 pre: " <b> 5. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Note:** The information below is for reference purposes only. Please **do not copy verbatim** for your report, including this warning.
-{{% /notice %}}
 
-# Secure Hybrid Access to S3 using VPC Endpoints
+
+# Smart Campus - Serverless Attendance System with Face Recognition
+
+## Building a Smart Attendance System with AWS Rekognition, Lambda, DynamoDB, and Event-Driven Architecture
 
 #### Overview
 
-**AWS PrivateLink** provides private connectivity to AWS services from VPCs and your on-premises networks, without exposing your traffic to the Public Internet.
+In this workshop, you will learn how to build a production-grade serverless attendance system using AI-powered face recognition technology. The system not only recognizes faces but also integrates **Face Liveness Detection** to prevent spoofing (detecting printed photos, video replays, and 3D masks), builds an **Event-Driven** architecture with EventBridge and SQS to ensure reliability, and creates a **Data Lake** for analytics using Athena and Glue.
 
-In this lab, you will learn how to create, configure, and test VPC endpoints that enable your workloads to reach AWS services without traversing the Public Internet.
+**What you will learn:**
+- Designing and deploying serverless architecture on AWS
+- Integrating AI/ML services (Rekognition Face Recognition + Liveness Detection)
+- Building event-driven systems with EventBridge and SQS
+- Implementing reliable messaging with Dead Letter Queues
+- Creating a Data Lake analytics pipeline with S3, Glue, and Athena
+- Setting up monitoring and alerting with CloudWatch
+- Applying security best practices (WAF, Cognito, IAM)
+- Optimizing costs for serverless applications
 
-You will create two types of endpoints to access Amazon S3: a Gateway VPC endpoint, and an Interface VPC endpoint. These two types of VPC endpoints offer different benefits depending on if you are accessing Amazon S3 from the cloud or your on-premises location
-+ **Gateway** - Create a gateway endpoint to send traffic to Amazon S3 or DynamoDB using private IP addresses.You route traffic from your VPC to the gateway endpoint using route tables.
-+ **Interface** - Create an interface endpoint to send traffic to endpoint services that use a Network Load Balancer to distribute traffic. Traffic destined for the endpoint service is resolved using DNS.
+**Estimated duration:** 3-4 hours
 
-#### Content
+**Estimated cost:** ~$10-15 USD (if cleaned up after 24 hours)
 
-1. [Workshop overview](5.1-Workshop-overview)
-2. [Prerequiste](5.2-Prerequiste/)
-3. [Access S3 from VPC](5.3-S3-vpc/)
-4. [Access S3 from On-premises](5.4-S3-onprem/)
-5. [VPC Endpoint Policies (Bonus)](5.5-Policy/)
-6. [Clean up](5.6-Cleanup/)
+#### Core Workflow
+
+In this workshop, you will deploy a complete attendance workflow:
+
+```
+Camera captures face image
+  → API Gateway receives request
+  → Lambda processes
+  → Rekognition Face Liveness Check (detecting printed photo/video)
+  → Rekognition Face Recognition (face identification)
+  → Rule Engine validation (duplicate check, session check, time check)
+  → Save attendance record to DynamoDB
+  → Publish event to EventBridge
+  → EventBridge routes to SQS Queues
+  → Lambda Workers process (Analytics, Notification)
+  → Result: Record in Data Lake, Email notification
+```
+
+**Types of endpoints you will create:**
+- **Gateway VPC Endpoint**: To access S3 from Lambda within a VPC (if needed)
+- **Interface VPC Endpoint**: To access Rekognition and DynamoDB from a VPC (optional)
+- **API Gateway HTTP Endpoint**: Public endpoint for attendance check-in
+
+#### Table of Contents
+
+1. [Workshop Overview](5.1-overview)
+2. [Prerequisites](5.2-prerequisite/)
+3. [Step 1: Setup DynamoDB Tables](5.3-dynamodb/)
+4. [Step 2: Create Rekognition Face Collection](5.4-rekognition/)
+5. [Step 3: Deploy Lambda Functions](5.5-lambda/)
+6. [Step 4: Configure API Gateway](5.6-apigateway/)
+7. [Step 5: Setup EventBridge & SQS](5.7-eventbridge/)
+8. [Step 6: Create Analytics Pipeline](5.8-analytics/)
+9. [Step 7: System Testing](5.9-testing/)
+10. [Step 8: Monitoring with CloudWatch](5.10-monitoring/)
+11. [Step 9: Cost and Security Optimization](5.11-optimization/)
+12. [Cleanup Resources](5.12-cleanup/)

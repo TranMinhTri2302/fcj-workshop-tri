@@ -8,16 +8,6 @@ pre: " <b> 4. </b> "
 
 
 
-> In this section, you should list and describe in detail the events you have participated in during your internship or work experience.  
-> 
-> Each event should be presented in the format Event 1, Event 2, Event 3…, along with the following details:
-> * Event name
-> * Date and time
-> * Location (if applicable)
-> * Your role in the event (attendee, event support, speaker, etc.)
-> * A brief description of the event’s content and main activities
-> * Outcomes or value gained (lessons learned, new skills, contribution to the team/project)
-> * This listing helps demonstrate your actual participation as well as the soft skills and experience you have gained from each event.
 
 During my internship, I participated in three events. Each one was a memorable experience that provided new, interesting, and useful knowledge, along with wonderful moments.
 
@@ -40,10 +30,10 @@ During my internship, I participated in three events. Each one was a memorable e
 &emsp;**Role:** Attendee  
 
 ### [Event 3](4.3-Event3/)  
-&emsp;**Event Name:** Placeholder – Event to be updated later
+&emsp;**Event Name:** AWS FCAJ Agent Forge - Agent Core in Production (Deepdive day 2)
 
 &emsp;**Date & Time:** 09:00 AM, August 8, 2026
 
-&emsp;**Location:** To be updated
+&emsp;**Location:** 26th Floor, Bitexco Tower, 02 Hai Trieu Street, Saigon Ward, Ho Chi Minh City  
 
-&emsp;**Role:** Attendee (placeholder)
+&emsp;**Role:** Attendee  

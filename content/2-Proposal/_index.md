@@ -1,401 +1,268 @@
 ---
-
-title: "Proposal"
+title: "Project Proposal"
 date: 2024-01-01
 weight: 2
 chapter: false
 pre: " <b> 2. </b> "
---------------------
+---
 
-# OpsTicket CI/CD — Internal Issue Management System
+# Smart Campus Platform — Serverless Smart Attendance System
 
-## Building and Deploying a CI/CD Pipeline on AWS for an Internal Issue Management Web Application
+## Building a Facial Recognition Attendance System with Event-Driven Architecture on AWS
 
-### 1. Executive Summary
+### 1. Project Summary
 
-OpsTicket CI/CD is a cloud-based internal issue management system designed for offices, schools, labs, and small teams. The system allows users to report internal issues such as unstable Wi-Fi, broken projectors, printer failures, air conditioner problems, power socket issues, or locked internal accounts.
+Smart Campus Platform is an intelligent attendance management system designed for educational institutions and enterprises, built entirely on AWS serverless architecture. The system automates the attendance process using AI-powered facial recognition technology, combined with task management, leave management, and data analytics capabilities.
 
-In many real working environments, these issues are often reported through chat messages or direct conversations. This is quick, but it is not easy to track. A message can be missed, the responsible person may be unclear, and there is no reliable way to know whether the issue is new, in progress, or already resolved.
+In many real-world working environments, attendance is still conducted manually or via proximity cards. Individuals can ask colleagues to swipe cards on their behalf, use another person's card, or present a printed photograph to bypass rudimentary camera systems. Compiling attendance reports also demands considerable manual processing time.
 
-OpsTicket solves this problem by turning informal reports into structured tickets. Each ticket includes a title, description, category, location, priority, status, assignee group, and creation time. Support staff can update ticket status, assign tickets to the correct group, and monitor the overall issue handling process.
+Smart Campus addresses these issues by transforming fragmented attendance procedures into a structured and automated workflow. The system leverages **Amazon Rekognition Face Recognition** in conjunction with **Face Liveness Detection** to identify faces and prevent fraud through printed photos, video replays, or 3D masks. Each attendance event is recorded with the following details: user_id, timestamp, session_type (MORNING/AFTERNOON/EVENING), status (PRESENT/LATE/ABSENT/REJECTED), confidence score, and camera_id. The system automatically detects violations such as late check-ins, duplicate entries, or out-of-hours attendance.
 
-From the AWS and DevOps perspective, this project focuses on building, containerizing, deploying, and monitoring the application through a CI/CD pipeline. The backend is built with Java Spring Boot, packaged as a Docker image, stored in Amazon ECR, and deployed to Amazon ECS Fargate. Ticket data is stored in Amazon DynamoDB. Logs, metrics, and alarms are monitored through Amazon CloudWatch. GitHub Actions is used to automate testing, image building, image pushing, and deployment.
+From an AWS and Cloud Architecture perspective, the project focuses on building, deploying, and operating a production-grade serverless application. The backend is built with Python FastAPI, running on **AWS Lambda** via the **Mangum adapter**, exposing APIs through **Amazon API Gateway**, persisting data in **Amazon DynamoDB**, processing events through **Amazon EventBridge** and **Amazon SQS**, performing data analytics with **Amazon Athena** and **AWS Glue**, monitoring with **Amazon CloudWatch**, and integrating AI capabilities with **Amazon Bedrock (Claude 3)**.
 
-The purpose of this project is not only to build a web application, but also to demonstrate a complete cloud deployment workflow on AWS.
+Notably, the system is architected to be **100% Serverless on the AWS platform**, employing an Event-Driven Microservices architecture to ensure high scalability, low operational cost, and resilient operations. The objective of this project extends beyond building a web application — it demonstrates a complete end-to-end cloud deployment process on AWS following industry best practices.
 
 ---
 
 ### 2. Problem Statement
 
-### What’s the Problem?
+#### What Is the Current Problem?
 
-Internal issues in small organizations are often handled manually or informally. For example, a student may message an admin that the projector in room B203 is not working, or an employee may tell the facility team that the air conditioner is broken. These reports are easy to create but difficult to manage.
+In small and medium-sized organizations, educational institutions, or office environments, attendance is frequently performed manually or informally. For example, students may ask classmates to mark attendance on their behalf, employees may use a colleague's card to check in, or individuals may present a printed photograph to circumvent basic camera systems. These practices are difficult to control and highly susceptible to fraud.
 
-The main problems are:
+The key issues include:
 
-* Reports can be missed in chat groups.
-* There is no clear ticket status.
-* It is difficult to know who is responsible for the issue.
-* Urgent issues are not clearly separated from normal ones.
-* There is no simple dashboard to view open, resolved, or overdue issues.
-* Manual deployment can cause inconsistent application versions.
-* Without monitoring, backend errors may only be noticed after users complain.
+* Attendance fraud is easily committed through proxy check-ins, printed photos, or shared cards.
+* Manual attendance is time-consuming, taking approximately 5 to 10 minutes per session for 50 individuals.
+* Tracking and aggregating attendance data is difficult.
+* No real-time alerts are generated when violations occur.
+* Consolidated reports require manual processing, consuming several hours.
+* Task and leave management is fragmented and lacks centralization.
+* Manual deployments result in version inconsistencies.
+* No monitoring is in place — errors are only discovered when users report them.
 
-### The Proposed Solution
+#### Proposed Solution
 
-OpsTicket provides a structured ticket workflow for internal issue management. Users can create tickets, and support staff can process them through clear statuses:
+Smart Campus delivers a fully structured and automated attendance process. Users simply stand in front of the camera for 2 to 3 seconds, and the system automatically executes the following steps:
 
-```txt
-NEW → ASSIGNED → IN_PROGRESS → RESOLVED → CLOSED
+1. **Face Liveness Detection**: Verifies whether the subject is a live person, detecting printed photos, video replays, and 3D masks.
+2. **Face Recognition**: Identifies the face and matches it against the registered database.
+3. **Rule Engine**: Applies business rules including duplicate checking, session validation, and time verification.
+4. **Auto Record**: Automatically logs the attendance record into DynamoDB.
+5. **Event Publishing**: Publishes events to trigger downstream services such as notifications, analytics, and security.
+
+Attendance workflow:
+
+```text
+Camera → Liveness Check (80%+) → Face Recognition (80%+) → Rule Engine → Record → Events
 ```
 
-Tickets are classified by priority:
+Attendance statuses:
 
-```txt
-P1 - Critical issue
-P2 - High priority issue
-P3 - Normal issue
+```text
+PRESENT: On time, within the first 15 minutes of the session
+LATE: Late, after 15 minutes but still within the session
+ABSENT: Absent, no attendance recorded
+REJECTED: Rejected, outside session hours or duplicate entry
 ```
 
-The backend also supports simple auto-assignment rules. For example:
+Sessions:
 
-```txt
-WIFI, PROJECTOR, PRINTER, ACCOUNT → IT_SUPPORT
-AIR_CONDITIONER, LIGHT, POWER_SOCKET → FACILITY
-GENERAL → GENERAL_ADMIN
+```text
+MORNING: 07:00 - 11:30
+AFTERNOON: 13:00 - 17:30
+EVENING: 18:00 - 21:00
 ```
 
-The system is deployed on AWS using a CI/CD workflow:
 
-```txt
-GitHub → GitHub Actions → Docker Build → Amazon ECR → Amazon ECS Fargate → CloudWatch
-```
+#### Project Benefits
 
-This makes OpsTicket a practical AWS use case. AWS is not used only as a hosting platform; it is part of the application delivery, runtime, storage, monitoring, security, and cost management process.
+Smart Campus delivers two primary benefits.
 
-### Benefits
+First, the system fundamentally improves the attendance process. Each attendance instance becomes a fully traceable record with timestamp, status, and confidence score. This effectively prevents fraud and enhances process transparency. Attendance time is reduced from 5–10 minutes down to 2–3 seconds per person.
 
-OpsTicket provides two main benefits.
-
-First, it improves internal issue handling. Every issue becomes a trackable record with status, priority, assignee group, and timestamps. This helps support teams avoid missed reports and makes the process more transparent.
-
-Second, it provides a practical DevOps learning project. The project covers Docker, CI/CD, Amazon ECR, Amazon ECS, DynamoDB, CloudWatch, IAM, and cleanup. These are important skills for deploying and operating applications on AWS.
+Second, the project serves as a hands-on cloud and DevOps exercise grounded in real-world practices. The project encompasses serverless architecture, event-driven patterns, AI/ML integration, data lake analytics, monitoring, security, and cost optimization — all of which are essential skills for deploying and operating applications on AWS.
 
 ---
 
-### 3. Solution Architecture
-
-OpsTicket uses a container-based AWS architecture with an automated CI/CD pipeline.
-
-At a high level, the workflow is:
-
-```txt
-Developer pushes code to GitHub
-→ GitHub Actions runs tests and builds Docker image
-→ Docker image is pushed to Amazon ECR
-→ Amazon ECS Fargate runs the backend container
-→ Application Load Balancer exposes the API
-→ Backend stores ticket data in DynamoDB
-→ CloudWatch collects logs and metrics
-→ CloudWatch Alarm and SNS can notify when issues occur
-```
-
-![OpsTicket CI/CD Architecture](/images/2-Proposal/opsticket-cicd-architecture.png)
-
-### AWS Services Used
-
-* **Amazon ECR**: Stores Docker images for the Spring Boot backend.
-* **Amazon ECS Fargate**: Runs the backend container without managing EC2 servers.
-* **Application Load Balancer**: Exposes the backend API and performs health checks.
-* **Amazon DynamoDB**: Stores ticket data such as title, category, priority, status, and assignee group.
-* **Amazon S3**: Can be used to host the frontend or store optional ticket attachment images.
-* **Amazon CloudFront**: Can distribute the frontend if it is deployed as a static web application.
-* **Amazon CloudWatch**: Collects application logs, metrics, and alarms.
-* **Amazon SNS**: Sends email notifications for system alarms or important ticket events.
-* **AWS IAM**: Controls permissions using roles and least-privilege policies.
-* **GitHub Actions**: Automates testing, Docker image build, ECR push, and ECS deployment.
-
-### Component Design
-
-* **Backend API**: Built with Java Spring Boot. It provides APIs for health check, ticket creation, ticket listing, ticket detail, status update, assignment, comments, and dashboard summary.
-* **Container Layer**: The backend is packaged into a Docker image so that it can run consistently across local, CI, and AWS environments.
-* **CI/CD Pipeline**: GitHub Actions runs tests, builds Docker images, pushes images to ECR, and deploys new versions to ECS.
-* **Runtime Layer**: ECS Fargate runs the backend container. The Application Load Balancer forwards user requests to the running task.
-* **Data Layer**: DynamoDB stores ticket data in a managed and scalable NoSQL database.
-* **Monitoring Layer**: CloudWatch provides logs, metrics, and alarms for operation and troubleshooting.
-
----
-
-### 4. Technical Implementation
-
-### Implementation Phases
-
-#### Phase 1: Build the Backend Application
-
-The project starts with a Spring Boot backend. The first API is `/health`, which is used for local testing and for the Load Balancer health check after deployment.
-
-After that, ticket APIs are developed:
-
-* Create ticket
-* List tickets
-* Get ticket detail
-* Update ticket status
-* Assign ticket
-* Add comment
-* Get dashboard summary
-
-At the beginning, the backend can use in-memory storage for quick testing. In the final AWS version, ticket data must be stored in DynamoDB.
-
-#### Phase 2: Containerize the Backend
-
-The backend is packaged as a Docker image. This ensures that the application can run the same way locally, in GitHub Actions, and on AWS.
-
-The expected result is a Docker image that exposes port `8080` and returns a successful response from:
-
-```txt
-GET /health
-```
-
-#### Phase 3: Push Image to Amazon ECR
-
-An Amazon ECR repository is created to store backend Docker images. The image is tagged and pushed to ECR. This step prepares the application image for ECS deployment.
-
-#### Phase 4: Deploy to Amazon ECS Fargate
-
-The application is deployed to ECS Fargate using an ECS cluster, task definition, ECS service, target group, Application Load Balancer, and security group. The Load Balancer uses `/health` to check whether the backend is running correctly.
-
-The expected result is that the backend can be accessed through the Load Balancer DNS name.
-
-#### Phase 5: Set Up CI Pipeline
-
-GitHub Actions is configured to run on pull requests. The CI pipeline should:
-
-* Checkout source code
-* Set up Java
-* Run Maven tests
-* Build the application
-* Build the Docker image
-
-This helps prevent broken code from being merged.
-
-#### Phase 6: Set Up CD Pipeline
-
-GitHub Actions is configured to run when code is pushed to the `main` branch. The CD pipeline should:
-
-* Build a new Docker image
-* Tag the image using the Git commit SHA
-* Push the image to Amazon ECR
-* Render a new ECS task definition
-* Deploy the new task definition to ECS
-* Wait until the ECS service is stable
-
-#### Phase 7: Integrate DynamoDB
-
-The backend is updated to store ticket data in DynamoDB. This makes data persistent even when ECS tasks restart or new versions are deployed.
-
-#### Phase 8: Add Monitoring and Alerts
-
-CloudWatch Logs are used to view backend logs. CloudWatch Metrics are used to monitor ECS and Load Balancer behavior. At least one CloudWatch Alarm should be created, such as an alarm for backend 5xx errors or high CPU usage. SNS can be used to send email notifications when an alarm is triggered.
-
-### Technical Requirements
-
-* **Programming Language**: Java
-* **Backend Framework**: Spring Boot
-* **Build Tool**: Maven
-* **Containerization**: Docker
-* **CI/CD Tool**: GitHub Actions
-* **Container Registry**: Amazon ECR
-* **Runtime Platform**: Amazon ECS Fargate
-* **Database**: Amazon DynamoDB
-* **Monitoring**: Amazon CloudWatch
-* **Notification**: Amazon SNS
-* **Security**: AWS IAM roles and least-privilege policies
-* **Recommended Region**: `ap-southeast-1`
-
-### Main Backend APIs
-
-* `GET /health`
-* `POST /tickets`
-* `GET /tickets`
-* `GET /tickets/{ticketId}`
-* `PATCH /tickets/{ticketId}/status`
-* `PATCH /tickets/{ticketId}/assign`
-* `POST /tickets/{ticketId}/comments`
-* `GET /dashboard/summary`
-* `POST /admin/sla/check`
-
-### Important Business Rules
-
-OpsTicket should not be only a basic CRUD application. The backend should include simple business rules to make the system more realistic.
-
-#### Ticket Status Workflow
-
-```txt
-NEW → ASSIGNED → IN_PROGRESS → RESOLVED → CLOSED
-```
-
-#### Priority and SLA
-
-```txt
-P1: Critical issue, expected response within 4 hours
-P2: High priority issue, expected response within 24 hours
-P3: Normal issue, expected response within 72 hours
-```
-
-#### Auto Assignment
-
-```txt
-WIFI, PROJECTOR, PRINTER, ACCOUNT, SOFTWARE, HARDWARE → IT_SUPPORT
-AIR_CONDITIONER, LIGHT, POWER_SOCKET, TABLE_CHAIR → FACILITY
-GENERAL → GENERAL_ADMIN
-```
-
----
-
-### 5. Timeline & Milestones
-
-### Project Timeline
-
-The project follows a 12-week internship timeline.
-
-* **Week 1: Study DevOps, CI/CD, Git, Docker, and AWS Deployment Options**
-  Understand the software delivery workflow and compare EC2, ECS, and Elastic Beanstalk.
-
-* **Week 2: Build the Initial OpsTicket Backend**
-  Create the Spring Boot project, health check API, and basic ticket APIs.
-
-* **Week 3: Dockerize the Application**
-  Create Dockerfile, build the image locally, and test the container.
-
-* **Week 4: Push Docker Image to Amazon ECR**
-  Create ECR repository, tag the image, and push it to AWS.
-
-* **Week 5: Set Up CI Pipeline**
-  Configure GitHub Actions to run Maven tests and build Docker images.
-
-* **Week 6: Deploy Backend to Amazon ECS Fargate**
-  Create ECS cluster, task definition, ECS service, target group, Load Balancer, and security group.
-
-* **Week 7: Set Up CD Pipeline**
-  Configure GitHub Actions to automatically deploy new versions to ECS when code is pushed to `main`.
-
-* **Week 8: Configure CloudWatch Logs and Metrics**
-  Verify backend logs and ECS/Load Balancer metrics in CloudWatch.
-
-* **Week 9: Integrate DynamoDB and Optional SNS Alert**
-  Store ticket data in DynamoDB and configure optional alert notifications.
-
-* **Week 10: Improve Security and Cost Optimization**
-  Review IAM permissions, avoid hard-coded credentials, reduce unnecessary cost, and plan cleanup.
-
-* **Week 11: Complete Blogs and Workshop Documentation**
-  Write blog posts and complete the bilingual workshop website.
-
-* **Week 12: End-to-End Testing, Screenshots, Cleanup, and Final Report**
-  Test the complete workflow, collect screenshots, clean up AWS resources, and finalize the report.
-
----
-
-### 6. Budget Estimation
-
-This project is designed for low-traffic workshop usage. The cost should remain low if the resources are used only during testing and cleaned up afterward.
-
-Main cost components:
-
-* **Amazon ECS Fargate**: Depends on CPU, memory, and running hours.
-* **Application Load Balancer**: Depends on running time and traffic.
-* **Amazon ECR**: Depends on Docker image storage.
-* **Amazon DynamoDB**: On-demand mode is suitable for small and unpredictable usage.
-* **Amazon CloudWatch Logs**: Depends on log volume and retention period.
-* **Amazon S3 and CloudFront**: Used only if the frontend or attachments are deployed.
-* **Amazon SNS**: Low cost for small-volume email notifications.
-
-Cost optimization strategies:
-
-* Use small ECS Fargate task size.
-* Stop or delete ECS resources after testing.
-* Use DynamoDB on-demand mode.
-* Set CloudWatch log retention to 7 or 14 days.
-* Delete old ECR images.
-* Clean up ALB, ECS, ECR, DynamoDB, S3, CloudWatch alarms, and log groups after the workshop.
-
-The final cost should be estimated using AWS Pricing Calculator based on the selected region, ECS task size, running hours, and expected traffic.
-
----
-
-### 7. Risk Assessment
-
-### Risk Matrix
-
-| Risk                              | Impact | Probability | Description                                                           |
-| --------------------------------- | ------ | ----------- | --------------------------------------------------------------------- |
-| IAM permission error              | High   | Medium      | GitHub Actions, ECS, or backend may fail if permissions are missing.  |
-| Docker build failure              | Medium | Medium      | Dockerfile or Maven configuration may cause build errors.             |
-| ECS task cannot start             | High   | Medium      | Wrong image URI, port mapping, or health check can stop deployment.   |
-| ALB health check failure          | High   | Medium      | If `/health` fails, ECS may keep replacing tasks.                     |
-| DynamoDB integration issue        | Medium | Medium      | Wrong table name, region, or IAM role can prevent data storage.       |
-| CloudWatch alarm misconfiguration | Medium | Low         | Alarm may not trigger if the metric or threshold is wrong.            |
-| Cost overrun                      | Medium | Low         | ECS, ALB, and logs may generate cost if resources are not cleaned up. |
-| Security exposure                 | High   | Low         | Hard-coded credentials or public resources can create risk.           |
-
-### Mitigation Strategies
-
-* Test the backend and Docker image locally before deploying to AWS.
-* Start ECS deployment with a simple `/health` endpoint first.
-* Use IAM roles and least-privilege permissions.
-* Do not commit AWS access keys or secrets to GitHub.
-* Use CloudWatch Logs to troubleshoot ECS task failures.
-* Keep the infrastructure small for workshop usage.
-* Document all cleanup steps clearly.
-
-### Contingency Plans
-
-* If ECS deployment fails, roll back to the previous working task definition revision.
-* If CD pipeline fails, deploy manually once and document the issue.
-* If DynamoDB integration is not ready, keep the API testable with temporary storage, then complete DynamoDB before final submission.
-* If SNS is not completed, CloudWatch Alarm can still be used as the minimum alerting demonstration.
-
----
-
-### 8. Expected Outcomes
-
-### Technical Outcomes
-
-By the end of the project, the expected technical outputs are:
-
-* A working Spring Boot backend for OpsTicket.
-* REST APIs for ticket management and dashboard summary.
-* Dockerized backend image.
-* Amazon ECR repository storing backend images.
-* Amazon ECS Fargate service running the backend.
-* Application Load Balancer exposing the API.
-* DynamoDB table storing ticket data.
-* GitHub Actions CI workflow.
-* GitHub Actions CD workflow.
-* CloudWatch Logs, Metrics, and at least one CloudWatch Alarm.
-* Cleanup instructions for all AWS resources.
-
-### Business Outcomes
-
-OpsTicket provides a simple but structured way to manage internal issues. Instead of reporting problems through scattered chat messages, each issue becomes a trackable ticket with status, priority, assignee group, and timestamps.
-
-For example, a ticket such as “Projector is not working in room B203” can be created as priority `P2`, assigned to `IT_SUPPORT`, processed through the workflow, and marked as resolved after the issue is fixed.
-
-### Learning Outcomes
-
-This project helps demonstrate practical knowledge in:
-
-* Backend API development with Java Spring Boot.
-* Business workflow design for ticket management.
-* Docker-based application packaging.
-* CI/CD automation using GitHub Actions.
-* AWS container deployment with ECR and ECS Fargate.
-* Data storage with DynamoDB.
-* Monitoring with CloudWatch.
-* Basic IAM security and cost optimization.
-
-### Long-term Value
-
-OpsTicket can be extended into a more complete internal operations system. Future improvements may include user authentication with Amazon Cognito, ticket image upload to S3, SLA checking with EventBridge, SNS notification workflow, React dashboard, and infrastructure as code using Terraform, AWS CDK, or CloudFormation.
-
-The project is designed as a practical AWS use case. It shows how AWS services support not only application hosting, but also deployment automation, data storage, monitoring, security, and operational cost control.
+## 3. Objectives
+- **Automation & Accuracy:** Leverage AI facial recognition combined with IP Whitelisting to enable rapid, highly accurate attendance with built-in fraud prevention.
+- **Data Centralization (Data Lake):** Build an Analytics Pipeline capable of ingesting thousands of event streams to support real-time reporting and analysis.
+- **100% Cost Optimization:** Fully embrace Serverless architecture (pay-per-API-call), ensuring zero cost when there are no active users.
+- **Cloud-Standard Security:** Enforce strict Role-Based Access Control (RBAC) and protect sensitive data through Firewall and Token-based authentication systems.
+
+## 4. Business Workflows & Solution Architecture
+
+> **[OVERALL ARCHITECTURE DIAGRAM]**
+> <!-- TODO: Once the architecture diagram is finalized, insert the image here using the syntax: ![Architecture Diagram](/images/architecture.png) -->
+
+The system is designed around an **Event-Driven Microservices** architecture and leverages more than 15 AWS cloud services. The following sections detail the 6 core business workflows and illustrate how AWS services collaborate to address the problem:
+
+### 4.1. Authentication & Authorization Workflow
+- **Business Logic:** Manage the full user account lifecycle and enforce Role-Based Access Control (RBAC) across Admin, Manager, and Staff roles. New users are required to change their password upon first login.
+- **AWS Services:** **Amazon Cognito** serves as the Identity Provider for issuing and validating JWT Tokens. The React/Vite Frontend application is hosted on **Amazon S3** and distributed globally via **Amazon CloudFront**.
+
+### 4.2. Face Registration Workflow
+- **Business Logic:** Prevent fraud by restricting each employee to registering exactly one verified facial identity in the system.
+- **AWS Services:** The `IndexFaces` API of **Amazon Rekognition** is invoked to extract biometric features and store the corresponding FaceID. Original JPEG/PNG images are securely stored in an **Amazon S3 Private Bucket**.
+
+### 4.3. Smart Attendance Workflow
+- **Business Logic:** The check-in/check-out process is performed by presenting a face to the camera. The system automatically matches the face, validates the applicable time window, and verifies whether the employee is connecting from an authorized office IP address (preventing fake GPS/VPN bypass).
+- **AWS Services:**
+  - **AWS WAF (Web Application Firewall):** Blocks attendance requests originating from outside the corporate network (IP Whitelisting).
+  - **Amazon Rekognition:** Invokes the `SearchFacesByImage` function to verify facial match confidence (Confidence > 95%).
+  - **Amazon API Gateway & AWS Lambda:** API Gateway receives requests from the Frontend and routes them to Lambda (running FastAPI) for business logic processing and status persistence in **Amazon DynamoDB**.
+
+### 4.4. Event Processing & Notification Workflow
+- **Business Logic:** When an employee successfully checks in or is assigned a new task, the system automatically dispatches multi-channel notifications to relevant stakeholders without degrading the end-user experience.
+- **AWS Services:**
+  - **Amazon EventBridge:** Receives events (e.g., `AttendanceRecorded`) and performs intelligent routing.
+  - **Amazon SQS:** Serves as a message queue buffering events from EventBridge and forwarding them to Lambda Background Workers.
+  - **Amazon SNS & Amazon SES:** Deliver Push Notifications and SMS (via SNS) as well as Emails (via SES) to management personnel.
+
+### 4.5. Task Management Workflow
+- **Business Logic:** Assign tasks with strict deadlines and process leave requests. Managers can attach confidential documents to tasks.
+- **AWS Services:**
+  - **Amazon DynamoDB:** Stores Task and Leave data structures with Global Secondary Indexes (GSI) for high-performance querying.
+  - **Amazon S3 Pre-signed URL:** Generates time-limited dynamic links for downloading confidential attachments, preventing data leakage.
+  - **Amazon EventBridge (Scheduled Rules):** Executes scheduled jobs every 30 minutes to scan for and alert on overdue tasks.
+
+### 4.6. Data Lake Analytics Workflow
+- **Business Logic:** Collect massive volumes of attendance logs across campuses, aggregate and organize data so that directors can view Performance Dashboards comparing metrics across departments.
+- **AWS Services:**
+  - **Amazon Kinesis Data Firehose:** Ingests attendance log streams, automatically partitions data by date (Dynamic Partitioning), and persists large batched files to the **S3 Data Lake**.
+  - **AWS Glue (Data Catalog):** Automatically crawls and catalogs the schema of JSON files stored on S3.
+  - **Amazon Athena:** A serverless SQL query engine that reads data directly from S3 via the Glue Catalog, returning high-speed statistical results to the Frontend.
+
+
+### 4.7. Core AWS Services Inventory
+The following table summarizes all AWS services utilized within the architecture:
+
+| No. | AWS SERVICE | ROLE & RESPONSIBILITY IN SMART CAMPUS | RATIONALE & TECHNICAL BENEFITS |
+| :---: | :--- | :--- | :--- |
+| 1 | **Amazon CloudFront** | Distributes the React Frontend application from the S3 Bucket to end users. Serves as the integration point for AWS WAF. | Accelerates page loading through caching at Edge Locations. Provides automatic HTTPS support and reduces bandwidth consumption. |
+| 2 | **AWS WAF** | Application firewall protecting the attendance endpoint by blocking non-office IP addresses. | Prevents remote attendance fraud and defends against web-based attacks and spam requests. |
+| 3 | **Amazon S3** | **Bucket 1:** Frontend static hosting. <br> **Bucket 2:** Facial images & confidential document storage. <br> **Bucket 3:** S3 Data Lake for log storage. | Extremely low storage cost with 99.999999999% durability. Supports S3 Pre-signed URLs for secure file access. Seamless integration with Athena. |
+| 4 | **Amazon API Gateway** | RESTful/HTTP API gateway receiving requests from the Frontend and invoking AWS Lambda functions. | Built-in Rate Limiting and native JWT authentication via Cognito Authorizer — no custom code required. |
+| 5 | **AWS Lambda** | **API Handler:** Processes API business logic. <br> **Workers:** Handles background event processing. | Serverless Pay-As-You-Go model (charges incurred only when code executes). Instant auto-scaling with zero server management. |
+| 6 | **Amazon DynamoDB** | Stores all business data (Users, Tasks, Leaves, Attendance records). | Serverless NoSQL database delivering single-digit millisecond response times, highly flexible with Global Secondary Indexes. |
+| 7 | **Amazon Cognito** | Manages User Pools, authenticates login credentials, and issues JWT Tokens. | Eliminates the need to build a custom authentication system. Provides high security and supports mandatory password change on first login. |
+| 8 | **Amazon EventBridge** | Event Bus that routes domain events (e.g., `AttendanceRecorded`) and executes scheduled rules (Cronjobs). | Decouples system modules following Event-Driven standards, enabling seamless addition of new business capabilities. |
+| 9 | **Amazon SQS** | Message queue positioned in front of background Workers. | Guarantees no data loss during processing failures. Integrated Dead Letter Queue (DLQ) enables automatic retries. |
+| 10 | **Amazon Rekognition** | Performs facial matching against registered employees during camera-based check-in. | Enterprise-grade AI service ready out-of-the-box — no model training required. Delivers high accuracy (Confidence > 95%). |
+| 11 | **Amazon Kinesis Data Firehose, Glue & Athena** | End-to-end pipeline that aggregates attendance logs on S3, catalogs schemas, and enables SQL-based analytics. | Automatic file batching optimizes S3/Athena costs. Cleanly separates OLTP and OLAP concerns. |
+| 12 | **AWS CodeBuild & CodePipeline** | Establishes a CI/CD Pipeline to automatically build the Frontend and package the Lambda Backend. | Enables fully automated Continuous Deployment from source code, ensuring safety and consistency across releases. |
+
+### 4.8. Architecture Assessment Against the 5 Pillars of the AWS Well-Architected Framework
+The entire Smart Campus Platform architecture is designed in strict adherence to the 5 Pillars of the AWS Well-Architected Framework:
+
+1. **Operational Excellence:** The full application lifecycle is managed automatically through CI/CD pipelines (CodeBuild/CodePipeline). Centralized monitoring of logs and event metrics via Amazon CloudWatch enables early detection of bottlenecks.
+2. **Security:** The Least Privilege principle is enforced through granular IAM Roles assigned to each Lambda function. Sensitive attachments are protected using S3 Pre-signed URLs, connections are encrypted via CloudFront HTTPS/TLS, and the API gateway is secured using AWS WAF combined with Cognito JWT Authorizer.
+3. **Reliability:** Continuous High Availability is ensured through the default Multi-AZ architecture of the AWS Serverless ecosystem. Automatic retry mechanisms and routing of failed messages to Amazon SQS Dead-Letter Queues (DLQ) prevent the loss of attendance logs.
+4. **Performance Efficiency:** Static Frontend assets are distributed seamlessly via CloudFront Edge Locations. Data read/write operations are optimized to single-digit milliseconds with DynamoDB, while heavy analytical queries are offloaded from the primary OLTP system to the Data Lake pipeline (Firehose & Athena).
+5. **Cost Optimization:** The 100% Serverless Event-Driven model is applied throughout (charges are incurred only when the system is invoked). S3 Lifecycle Rules are configured to automatically tier storage (transitioning old logs to Glacier), minimizing long-term cold storage costs.
+
+## 5. Proposed Timeline
+| Week | Work Items |
+| :--- | :--- |
+| **Week 1–2** | Requirements analysis, system architecture design, UML and architecture diagramming. Provision AWS networking resources, CloudFront, WAF, and static S3 hosting. |
+| **Week 3–4** | Develop Backend API (FastAPI) on AWS Lambda and DynamoDB. Integrate Cognito and Rekognition for facial recognition attendance features. |
+| **Week 5** | Design Event-Driven Architecture with EventBridge and SQS. Complete the notification workflow (SNS/SES). |
+| **Week 6–7** | Build the Data Lake Pipeline (Firehose → S3 → Glue → Athena) to serve Analytics Reports. Develop the ReactJS Frontend and connect it to the API. |
+| **Week 8** | Integrate CI/CD (CodeBuild, CodePipeline), implement automation testing, optimize performance (X-Ray), finalize deliverables, and write the project report. |
+
+## 6. Monthly Budget Estimation
+The budget estimate is calculated based on the actual operational scale of a medium-sized campus: **200 employees, each checking in an average of 1 to 4 times per day** (morning arrival, lunch departure, afternoon return, evening departure). In total, the system will process approximately **20,000 attendance events per month** and roughly **150,000 API requests per month** (including task assignments, reporting, and leave requests).
+
+To demonstrate the cost-efficiency of Serverless, the estimate below is calculated **based on standard Pay-As-You-Go pricing** without relying on the AWS 12-month Free Tier.
+
+| AWS SERVICE | EXPECTED MONTHLY USAGE | REFERENCE PRICING (AP-SOUTHEAST-1) | MONTHLY COST (USD) |
+| :--- | :--- | :--- | :---: |
+| **AWS Lambda** | 150,000 API Requests + 40,000 Worker executions (Memory: 512MB, Avg: 1s) | $0.20 / 1M Requests + Compute time | **$1.62** |
+| **Amazon API Gateway** | 150,000 HTTP API calls | $1.00 / 1M Requests | **$0.15** |
+| **Amazon SQS** | 50,000 SQS Requests (Send & Receive) | $0.40 / 1M Requests | **$0.02** |
+| **Amazon DynamoDB** | 500,000 WCU, 500,000 RCU (On-Demand Mode) + 2GB Storage | $1.25 / 1M WCU, $0.25 / 1M RCU + $0.25/GB | **$1.26** |
+| **Amazon S3** | ~5GB Storage (Frontend, Images, Data Lake) + 100k GET/PUT | $0.025 / GB Storage + $0.004 / 1k PUT | **$0.53** |
+| **Amazon CloudFront** | 20GB Data Transfer Out + 200k HTTPS Requests | $0.09 / GB | **$1.80** |
+| **AWS WAF** | 1 Web ACL + 1 Rule (IP Match) + 150k Requests | $5.00/Web ACL + $1.00/Rule + $0.60/1M Req | **$6.09** |
+| **Amazon Cognito** | Under 1,000 MAU (Monthly Active Users) | Free (under 50,000 MAU permanently) | **$0.00** |
+| **Amazon Rekognition** | 20,000 facial comparison scans (SearchFacesByImage) | $0.001 / Image scan | **$20.00** |
+| **Amazon Firehose & Athena** | ~1GB Data Ingestion & Scanned by Athena queries | $0.03/GB Ingestion + $5.00/TB Scanned | **$0.04** |
+| **Amazon CloudWatch** | 1GB Log Ingestion + 3 Custom Metrics | $0.57 / GB Logs | **$1.47** |
+| **AWS CodeBuild & CodePipeline** | ~100 build minutes (linux-small) + 1 Active Pipeline | $0.005 / minute + $1.00/Pipeline | **$1.50** |
+| **TOTAL** | **Smart Campus Operating Cost (200 Users)** | | **~ $34.48 / month** |
+
+### 6.1. Cost Optimization Strategy
+Although the baseline operating cost is already very low, the system employs additional advanced optimization strategies:
+1. **Pure Serverless Pay-As-You-Go Model:** Utilizing AWS Lambda with **API Gateway HTTP API** (71% cheaper than REST API) ensures the system incurs zero server maintenance costs during nighttime hours and weekends.
+2. **S3 Lifecycle Rules & Firehose Compression:** Automatic compression of attendance logs into Parquet format via Firehose, combined with transitioning logs older than 90 days to **S3 Glacier Flexible Retrieval**, reduces long-term storage costs by up to 85%.
+3. **SQS Long Polling:** Configuring `ReceiveMessageWaitTimeSeconds = 20` minimizes empty receive requests to SQS, yielding significant savings on API call costs.
+4. **AWS Lambda Power Tuning:** Systematic profiling is performed to identify the optimal memory allocation that balances response latency and execution cost, ensuring Lambda functions are not over-provisioned with excess memory.
+
+## 7. Risk Assessment & Mitigations
+
+| No. | RISK TYPE | DETAILED RISK ANALYSIS | SEVERITY | MITIGATION STRATEGY |
+| :---: | :--- | :--- | :---: | :--- |
+| 1 | **Performance** | **API Bottleneck or Lambda Cold Start:** When hundreds of employees simultaneously check in at 8:00 AM, Lambda latency may spike due to cold starts. | **HIGH** | - Configure **Provisioned Concurrency** for critical Lambda functions during peak hours.<br>- Employ SQS as a buffer to absorb sudden traffic spikes and enable asynchronous processing. |
+| 2 | **Security** | **API Spam Attacks / Fraud:** Malicious actors continuously send junk requests to exhaust the AWS budget (Financial Exhaustion) or submit spoofed images. | **CRITICAL** | - Enable **AWS WAF** with Rate Limiting and block unrecognized IPs.<br>- Require JWT authentication via Cognito Authorizer before any request is processed.<br>- Apply strict Least Privilege permissions to each Lambda execution role. |
+| 3 | **Operations** | **Data Loss:** The system is processing attendance when a Lambda Worker times out or crashes unexpectedly. | **MEDIUM** | - Configure an appropriate SQS `VisibilityTimeout`.<br>- Enable **Dead-Letter Queue (DLQ)** to capture messages that fail after 3 attempts, allowing engineers to investigate without losing attendance logs. |
+| 4 | **Cost Management** | **Sudden Cost Spike:** An infinite loop bug in Lambda code or excessive error logging to CloudWatch. | **MEDIUM** | - Set up **AWS Budgets Alerts** to automatically notify via Email/Slack when costs exceed $40 USD/month.<br>- Configure CloudWatch Log Retention to a maximum of 14 days instead of indefinite retention. |
+
+## 8. Expected Outcomes
+
+Upon successful deployment, the **Smart Campus** system is expected to achieve the following technical metrics and business objectives:
+
+**Technical KPIs:**
+- **Availability SLA:** Achieve a minimum of **99.9%** uptime, supported by AWS Multi-AZ Serverless infrastructure.
+- **API Response Latency:** **< 200ms** for standard read/write data operations via API Gateway & DynamoDB.
+- **AI Processing Time:** **< 2.0 seconds** from the moment a facial image is submitted to when the attendance result is returned.
+- **Concurrent Capacity:** Seamlessly handle a minimum of **500 simultaneous attendance requests** without request drops or system congestion.
+
+**Operational & Business Outcomes:**
+- **Cost Optimization:** Achieve over **80%** savings in infrastructure operating costs compared to traditional server provisioning (EC2/VPS), enabled by the serverless Pay-as-you-go model.
+- **High Maintainability:** The entire architecture is modularized into independently deployable Microservices (Event-Driven), allowing upgrades or bug fixes to individual features without disrupting the overall system.
+- **Superior User Experience:** Complete digitization of manual paperwork, providing a smart, modern, and transparent working environment for all personnel.
+
+#### Technical Deliverables
+
+Upon project completion, the expected technical deliverables include:
+
+* A fully operational FastAPI backend with over 20 API endpoints.
+* Face registration and recognition achieving accuracy above 95%.
+* Operational Face Liveness Detection effectively preventing fraud.
+* 8 DynamoDB tables populated with complete data.
+* A fully functional event-driven architecture utilizing EventBridge, SQS, and Lambda workers.
+* An S3 Data Lake with data partitioned by date.
+* Glue Crawler automatically updating the data schema.
+* Athena queries returning accurate analytical results.
+* An AI Assistant capable of answering questions in Vietnamese.
+* A CloudWatch Dashboard displaying real-time metrics.
+* A CI/CD pipeline enabling automated deployments.
+* A React Frontend application hosted on CloudFront.
+* Security hardened with WAF, Cognito, and IAM.
+* Comprehensive instructions for cleaning up all provisioned AWS resources.
+
+#### Business Deliverables
+
+Smart Campus establishes a structured management process. Instead of relying on manual attendance or easily-fraudulent swipe cards, each attendance instance becomes a verifiable record containing timestamp, status, confidence score, and camera_id.
+
+For example, when an employee stands before the camera, the system automatically performs facial recognition, validates liveness, applies the rule engine, and records the result as PRESENT or LATE — all within 2 to 3 seconds.
+
+#### Learning Outcomes
+
+The project demonstrates practical, hands-on knowledge in the following areas:
+
+* Designing serverless architecture on AWS.
+* Building event-driven systems.
+* Integrating AI/ML services including Rekognition and Bedrock.
+* Constructing Data Lake analytics pipelines.
+* Monitoring and troubleshooting.
+* Security best practices.
+* Cost optimization.
+* CI/CD automation.
+
+#### Long-Term Value
+
+Smart Campus can be extended into several future development directions, including a multi-tenant SaaS platform, mobile applications for iOS and Android, IoT integration with smart cameras, advanced analytics with SageMaker, geofencing with location services, and integration with ERP or CRM systems.
+
+The project is designed as a practical, real-world AWS use case. It demonstrates that AWS not only supports application hosting, but also enables automated deployment, scalable data storage, AI/ML processing, data analytics, comprehensive monitoring, robust security, and effective operational cost control.
