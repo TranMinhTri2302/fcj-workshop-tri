@@ -8,46 +8,58 @@ pre: " <b> 5.8. </b> "
 
 #### Tổng quan
 
-Trong bước này, bạn sẽ xây dựng Data Lake trên S3 để lưu trữ và phân tích dữ liệu attendance, tasks, và events. Sử dụng:
-- **S3**: Data Lake storage với partitioning theo date
-- **AWS Glue Crawler**: Tự động discover schema
-- **Amazon Athena**: SQL queries trên S3 data
+Trong bước này, bạn sẽ xây dựng **Analytics Pipeline cấp Enterprise** trên AWS để lưu trữ và phân tích dữ liệu attendance, tasks, leaves, và events. Đây là triển khai **Workflow 5 (WF5) - Enterprise Analytics & Reporting** từ hệ thống Smart Campus.
 
-#### Tại sao cần Data Lake?
+Sử dụng:
+- **S3**: Data Lake storage với partitioning theo date (year/month/day)
+- **AWS Glue Crawler**: Tự động discover schema (3 tables: attendance, tasks, users)
+- **Amazon Athena**: SQL queries trên S3 data cho OLAP analytics
+- **Kinesis Data Firehose**: Streaming throughput cao đến Data Lake (nâng cao optional)
 
-**DynamoDB limitations:**
-- ❌ Không hỗ trợ complex analytics queries
-- ❌ Đắt nếu scan large dataset
-- ❌ Không hỗ trợ JOIN, GROUP BY phức tạp
+#### Tại sao cần Data Lake? (Kiến trúc Hybrid OLTP + OLAP)
 
-**S3 Data Lake advantages:**
-- ✅ Cheap storage ($0.023/GB/month)
-- ✅ Support analytics at scale (petabytes)
-- ✅ Query với Athena (SQL standard)
-- ✅ Integrate với BI tools (QuickSight, Tableau)
+**Hạn chế của DynamoDB (OLTP):**
+- ❌ Không hỗ trợ complex analytics queries (không JOIN, GROUP BY phức tạp)
+- ❌ Đắt đỏ khi scan large dataset (chi phí read capacity)
+- ❌ Chỉ hỗ trợ truy cập dựa trên key
+
+**Ưu điểm của S3 Data Lake (OLAP):**
+- ✅ Lưu trữ rẻ ($0.023/GB/tháng)
+- ✅ Analytics quy mô lớn (petabytes)
+- ✅ Query với Athena (SQL chuẩn)
+- ✅ Tích hợp BI tools (QuickSight, Tableau)
+- ✅ Tách biệt analytics khỏi transactional DB
+
+**Cách tiếp cận Hybrid của Smart Campus:**
+- **Phase 1 (DynamoDB Direct)**: Query real-time cho dữ liệu gần đây (< 14 ngày) - độ trễ thấp
+- **Phase 2 (Athena/S3 Data Lake)**: Query lịch sử/Big Data - tiết kiệm chi phí cho scan lớn
+- **Auto-fallback**: Nếu Athena lỗi, tự động fallback về DynamoDB
 
 #### Kiến trúc Data Lake
 
-```
-[Analytics Worker Lambda]
-    ↓ Write JSON
-[S3 Data Lake]
-    ├─ attendance/
-    │   ├─ year=2026/
-    │   │   ├─ month=08/
-    │   │   │   ├─ day=01/
-    │   │   │   │   ├─ record1.json
-    │   │   │   │   └─ record2.json
-    │   │   │   └─ day=02/
-    │   └─ ...
-    ├─ tasks/
-    └─ events/
-    ↓
-[Glue Crawler] → Discover schema
-    ↓
-[Glue Data Catalog]
-    ↓
-[Amazon Athena] → SQL queries
+```mermaid
+graph LR
+    subgraph "Application Layer (OLTP)"
+        Lambda["Lambda (FastAPI)"] --> DynDB["DynamoDB\nReal-time Data"]
+    end
+
+    subgraph "Data Ingestion - Reliable"
+        Lambda -->|"Publish AttendanceRecorded"| EB["EventBridge"]
+        EB -->|"Enqueue"| SQS["Amazon SQS\nAnalytics Queue\n- Guaranteed Delivery\n- Auto Retry x3\n- Dead Letter Queue"]
+        SQS -->|"Trigger (with retry)"| Worker["Lambda\nAnalytics Worker"]
+        Worker -->|"Write partitioned data"| S3["S3 Data Lake\n/attendance/year=.../\n/tasks/year=.../\n/users/year=../."]
+    end
+
+    subgraph "Analytics Layer (OLAP)"
+        S3 -->|"Auto Crawl Schema"| Glue["AWS Glue\nCrawler + Catalog"]
+        Glue -->|"Table Metadata"| Athena["Amazon Athena\nSQL Engine"]
+        Athena -->|"Query Results"| Results["S3 athena-results/"]
+    end
+
+    subgraph "Presentation"
+        Lambda -->|"SQL Query"| Athena
+        Athena -->|"Aggregated Data"| Dashboard["Analytics Dashboard\n(React Frontend)"]
+    end
 ```
 
 #### Bước 1: Tạo S3 Data Lake Bucket
@@ -76,9 +88,9 @@ aws s3api put-bucket-encryption \
   --region ap-southeast-1
 ```
 
-**Tạo folder structure:**
+**Tạo folder structure (partitioned theo entity):**
 ```bash
-# Tạo prefix (folders)
+# Tạo prefix (folders) cho từng entity
 aws s3api put-object \
   --bucket smart-campus-datalake-${AWS_ACCOUNT_ID} \
   --key attendance/ \
@@ -87,6 +99,16 @@ aws s3api put-object \
 aws s3api put-object \
   --bucket smart-campus-datalake-${AWS_ACCOUNT_ID} \
   --key tasks/ \
+  --region ap-southeast-1
+
+aws s3api put-object \
+  --bucket smart-campus-datalake-${AWS_ACCOUNT_ID} \
+  --key users/ \
+  --region ap-southeast-1
+
+aws s3api put-object \
+  --bucket smart-campus-datalake-${AWS_ACCOUNT_ID} \
+  --key leaves/ \
   --region ap-southeast-1
 
 aws s3api put-object \
@@ -100,9 +122,9 @@ aws s3api put-object \
   --region ap-southeast-1
 ```
 
-#### Bước 2: Setup Lifecycle Policy (Cost Optimization)
+#### Bước 2: Setup Lifecycle Policy (Tối ưu chi phí)
 
-**Tự động transition data sang Glacier sau 90 ngày:**
+**Tự động transition data sang Glacier sau 90 ngày, xóa Athena results sau 7 ngày:**
 
 ```bash
 cat > lifecycle-policy.json <<EOF
@@ -113,6 +135,19 @@ cat > lifecycle-policy.json <<EOF
       "Status": "Enabled",
       "Filter": {
         "Prefix": "attendance/"
+      },
+      "Transitions": [
+        {
+          "Days": 90,
+          "StorageClass": "GLACIER"
+        }
+      ]
+    },
+    {
+      "Id": "TransitionTasksToGlacier",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "tasks/"
       },
       "Transitions": [
         {
@@ -141,16 +176,28 @@ aws s3api put-bucket-lifecycle-configuration \
   --region ap-southeast-1
 ```
 
-#### Bước 3: Verify Analytics Worker Writing Data
+#### Bước 3: Verify Analytics Worker Writing Data (Kinesis Firehose Integration)
 
-**Check Analytics Worker code (đã tạo ở bước 5):**
+**Analytics Worker sử dụng Kinesis Data Firehose cho streaming throughput cao:**
 
 ```python
-# app/workers/analytics_worker.py (reminder)
+# app/workers/analytics_worker.py
+import boto3
+import json
+from datetime import datetime
+
+firehose = boto3.client('firehose', region_name='ap-southeast-1')
+DATA_LAKE_BUCKET = 'smart-campus-datalake-xxxxxxxxxxxx'
+
 def handler(event, context):
+    """
+    Xử lý events từ SQS Analytics Queue
+    Stream đến S3 Data Lake qua Kinesis Firehose
+    """
     for record in event['Records']:
         body = json.loads(record['body'])
         detail = body.get('detail', {})
+        event_type = body.get('detail-type', 'Unknown')
         
         # Extract date for partitioning
         timestamp = detail.get('timestamp', datetime.utcnow().isoformat())
@@ -158,18 +205,35 @@ def handler(event, context):
         year, month, day = date.split('-')
         
         # Determine prefix based on event type
-        if 'Attendance' in body.get('detail-type', ''):
+        if 'Attendance' in event_type:
             prefix = f'attendance/year={year}/month={month}/day={day}/'
+        elif 'Task' in event_type:
+            prefix = f'tasks/year={year}/month={month}/day={day}/'
+        elif 'User' in event_type:
+            prefix = f'users/year={year}/month={month}/day={day}/'
+        else:
+            prefix = f'events/year={year}/month={month}/day={day}/'
         
-        # Write to S3
-        key = f"{prefix}{context.request_id}.json"
-        s3.put_object(
-            Bucket=DATA_LAKE_BUCKET,
-            Key=key,
-            Body=json.dumps(detail),
-            ContentType='application/json'
+        # Add partition keys to record for Firehose
+        detail['partition_year'] = year
+        detail['partition_month'] = month
+        detail['partition_day'] = day
+        
+        # Send to Firehose (batches automatically)
+        firehose.put_record(
+            DeliveryStreamName='smart-campus-attendance-stream',
+            Record={'Data': json.dumps(detail) + '\n'}
         )
+    
+    return {'statusCode': 200, 'body': f'Processed {len(event["Records"])} records'}
 ```
+
+**Cấu hình Kinesis Firehose Delivery Stream:**
+- **DeliveryStreamName**: `smart-campus-attendance-stream`
+- **Destination**: S3 (smart-campus-datalake bucket)
+- **Buffer hints**: 60 seconds hoặc 5 MB
+- **Compression**: GZIP
+- **Prefix**: `attendance/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/`
 
 **Test write manually:**
 ```bash
@@ -187,7 +251,7 @@ cat > test-attendance.json <<EOF
 }
 EOF
 
-# Upload to S3 with partitioning
+# Upload to S3 with partitioning (simulating Firehose output)
 aws s3 cp test-attendance.json \
   s3://smart-campus-datalake-${AWS_ACCOUNT_ID}/attendance/year=2026/month=08/day=06/att-test-001.json \
   --region ap-southeast-1
@@ -221,7 +285,7 @@ aws iam create-role \
   --assume-role-policy-document file://glue-trust-policy.json \
   --description "Role for Glue Crawler to access S3 Data Lake"
 
-# Attach policies
+# Attach AWS managed policy
 aws iam attach-role-policy \
   --role-name SmartCampusGlueCrawlerRole \
   --policy-arn arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
@@ -257,7 +321,7 @@ aws iam put-role-policy \
 aws glue create-database \
   --database-input '{
     "Name": "smart_campus_db",
-    "Description": "Smart Campus Data Lake"
+    "Description": "Smart Campus Data Lake - Attendance, Tasks, Users"
   }' \
   --region ap-southeast-1
 ```
@@ -269,10 +333,9 @@ aws glue get-database \
   --region ap-southeast-1
 ```
 
-#### Bước 6: Tạo Glue Crawler
+#### Bước 6: Tạo Glue Crawlers (3 Tables)
 
-**Crawler cho attendance data:**
-
+**Crawler 1: Attendance Data**
 ```bash
 aws glue create-crawler \
   --name smart-campus-attendance-crawler \
@@ -291,8 +354,7 @@ aws glue create-crawler \
   --region ap-southeast-1
 ```
 
-**Crawler cho tasks data:**
-
+**Crawler 2: Tasks Data**
 ```bash
 aws glue create-crawler \
   --name smart-campus-tasks-crawler \
@@ -306,54 +368,52 @@ aws glue create-crawler \
   --region ap-southeast-1
 ```
 
-#### Bước 7: Run Crawler
-
+**Crawler 3: Users Data**
 ```bash
-# Start attendance crawler
-aws glue start-crawler \
-  --name smart-campus-attendance-crawler \
+aws glue create-crawler \
+  --name smart-campus-users-crawler \
+  --role arn:aws:iam::${AWS_ACCOUNT_ID}:role/SmartCampusGlueCrawlerRole \
+  --database-name smart_campus_db \
+  --targets '{
+    "S3Targets": [{
+      "Path": "s3://smart-campus-datalake-'${AWS_ACCOUNT_ID}'/users/"
+    }]
+  }' \
   --region ap-southeast-1
-
-# Check status
-aws glue get-crawler \
-  --name smart-campus-attendance-crawler \
-  --region ap-southeast-1 \
-  --query 'Crawler.State' \
-  --output text
 ```
 
-**Wait for completion (1-2 minutes):**
+#### Bước 7: Run Crawlers
+
 ```bash
-while true; do
-  STATE=$(aws glue get-crawler \
-    --name smart-campus-attendance-crawler \
-    --region ap-southeast-1 \
-    --query 'Crawler.State' \
-    --output text)
-  
-  if [ "$STATE" = "READY" ]; then
-    echo "✅ Crawler finished!"
-    break
-  fi
-  
-  echo "Crawler state: $STATE, waiting..."
-  sleep 10
+# Start all crawlers
+aws glue start-crawler --name smart-campus-attendance-crawler --region ap-southeast-1
+aws glue start-crawler --name smart-campus-tasks-crawler --region ap-southeast-1
+aws glue start-crawler --name smart-campus-users-crawler --region ap-southeast-1
+
+# Check status (wait 1-2 minutes)
+for CRAWLER in smart-campus-attendance-crawler smart-campus-tasks-crawler smart-campus-users-crawler; do
+  while true; do
+    STATE=$(aws glue get-crawler --name $CRAWLER --region ap-southeast-1 --query 'Crawler.State' --output text)
+    if [ "$STATE" = "READY" ]; then
+      echo "✅ $CRAWLER finished!"
+      break
+    fi
+    echo "$CRAWLER state: $STATE, waiting..."
+    sleep 10
+  done
 done
 ```
 
-**Check created table:**
+**Check created tables:**
 ```bash
-aws glue get-table \
-  --database-name smart_campus_db \
-  --name attendance \
-  --region ap-southeast-1
+aws glue get-tables --database-name smart_campus_db --region ap-southeast-1
 ```
 
-Expected: Table với schema auto-discovered từ JSON files.
+Expected: 3 tables (attendance, tasks, users) với schema auto-discovered từ JSON files.
 
 #### Bước 8: Query Data với Athena
 
-**Setup Athena output location:**
+**Setup Athena Workgroup với output location:**
 ```bash
 aws athena create-work-group \
   --name smart-campus-workgroup \
@@ -361,8 +421,7 @@ aws athena create-work-group \
   --region ap-southeast-1
 ```
 
-**Query 1: Total attendance hôm nay**
-
+**Query 1: Attendance Summary (Daily)**
 ```sql
 SELECT 
   COUNT(*) as total_attendance,
@@ -374,6 +433,57 @@ WHERE year = '2026'
   AND day = '06'
 GROUP BY status, session_type
 ORDER BY session_type, status
+```
+
+**Query 2: Attendance Trend (30 ngày gần nhất)**
+```sql
+SELECT 
+  date,
+  COUNT(*) as total,
+  SUM(CASE WHEN status = 'PRESENT' THEN 1 ELSE 0 END) as present,
+  SUM(CASE WHEN status = 'LATE' THEN 1 ELSE 0 END) as late,
+  SUM(CASE WHEN status = 'ABSENT' THEN 1 ELSE 0 END) as absent
+FROM attendance
+WHERE year = '2026' AND month = '08'
+GROUP BY date
+ORDER BY date
+```
+
+**Query 3: Department Comparison Matrix (Enterprise Analytics)**
+```sql
+SELECT 
+  u.department,
+  COUNT(DISTINCT u.user_id) as total_users,
+  ROUND(
+    SUM(CASE WHEN a.status = 'PRESENT' THEN 1 ELSE 0 END) * 100.0 / 
+    COUNT(*), 1
+  ) as punctuality_rate,
+  SUM(CASE WHEN a.status = 'LATE' THEN 1 ELSE 0 END) as late_count,
+  SUM(CASE WHEN a.status = 'ABSENT' THEN 1 ELSE 0 END) as absent_count
+FROM attendance a
+JOIN users u ON a.user_id = u.user_id
+WHERE a.year = '2026' AND a.month = '08'
+GROUP BY u.department
+ORDER BY punctuality_rate DESC
+```
+
+**Query 4: Task Workload Analytics (WF8 Integration)**
+```sql
+SELECT 
+  u.department,
+  u.full_name,
+  COUNT(t.task_id) as total_assigned,
+  SUM(CASE WHEN t.status = 'DONE' THEN 1 ELSE 0 END) as completed,
+  ROUND(
+    SUM(CASE WHEN t.status = 'DONE' THEN 1 ELSE 0 END) * 100.0 / 
+    COUNT(t.task_id), 1
+  ) as completion_rate,
+  SUM(CASE WHEN t.due_date < CURRENT_DATE AND t.status != 'DONE' THEN 1 ELSE 0 END) as overdue
+FROM tasks t
+JOIN users u ON t.assignee_id = u.user_id
+WHERE t.created_at >= '2026-08-01'
+GROUP BY u.department, u.full_name
+ORDER BY total_assigned DESC
 ```
 
 **Execute via CLI:**
@@ -398,6 +508,90 @@ aws athena get-query-execution \
   --query 'QueryExecution.Status.State' \
   --output text
 ```
+
+**Get results:**
+```bash
+aws athena get-query-results \
+  --query-execution-id ${QUERY_ID} \
+  --region ap-southeast-1
+```
+
+#### Bước 9: Backend Integration - Dual Engine Query
+
+**Module Reports sử dụng cách tiếp cận dual-engine (app/modules/reports/repository.py):**
+
+```python
+# Phase 1: Try Athena for big data queries
+# Phase 2: Fallback to DynamoDB for real-time/recent data
+
+async def get_trend_records(self, start_date: str, end_date: str, department: str = None):
+    # Try Athena first (for historical data > 14 days)
+    if self.athena_enabled and (datetime.now() - parse_date(start_date)).days > 14:
+        try:
+            return await self._query_athena_trend(start_date, end_date, department)
+        except Exception as e:
+            logger.warning(f"Athena query failed, falling back to DynamoDB: {e}")
+    
+    # Fallback to DynamoDB (real-time, recent data)
+    return await self._query_dynamodb_trend(start_date, end_date, department)
+
+async def get_report_summary(self, period_start: str, period_end: str, department: str = None):
+    # Single-pass loop optimization (fixes N×M DynamoDB reads)
+    records = await self.get_trend_records(period_start, period_end, department)
+    
+    # Aggregate in memory - single pass
+    summary = {
+        'total_users': set(),
+        'present': 0, 'late': 0, 'absent': 0,
+        'by_session': {'MORNING': 0, 'AFTERNOON': 0, 'EVENING': 0}
+    }
+    
+    for r in records:
+        user_id = r.get('userId') or r.get('user_id')
+        summary['total_users'].add(user_id)
+        summary[r['status']] += 1
+        summary['by_session'][r.get('session_type', 'MORNING')] += 1
+    
+    return {
+        'total_users': len(summary['total_users']),
+        'punctuality_rate': round(summary['present'] / max(sum(summary.values()), 1) * 100, 1),
+        'by_status': {k: v for k, v in summary.items() if k in ['present', 'late', 'absent']},
+        'by_session': summary['by_session']
+    }
+```
+
+#### Tính năng Enterprise Analytics (WF5 Upgrade)
+
+### Phân quyền Analytics dựa trên RBAC
+
+| Role | View Scope | Features |
+|:---|:---|:---|
+| **PO/Director/Admin** | Global (All Departments) | Department Comparison Matrix, Cross-department analytics, Full export |
+| **PM/Department Manager** | Department-scoped | Department KPIs, Team workload, Top late/absent in dept, Dept export |
+| **STAFF/Employee** | Personal (Self-service) | My attendance, My task workload, My KPIs, Personal export only |
+
+### Các KPI chính được tính toán
+
+1. **Punctuality Rate**: `PRESENT / (PRESENT + LATE + ABSENT) × 100`
+2. **Tardiness Index**: `LATE / Total × 100` (Alert if > 15%)
+3. **Absenteeism Rate**: `ABSENT / Total × 100`
+4. **Task Completion Rate**: `DONE / Total Assigned × 100`
+5. **MTTR (Mean Time To Repair)**: Avg time from OPEN to DONE for MAINTENANCE tasks
+
+### Cảnh báo bất thường tự động
+
+- **Consecutive Late**: 3+ ngày đi muộn liên tiếp → Alert to Manager
+- **Dept Performance Drop**: Completion rate < 70% → Alert to Director
+- **Security Anomaly**: Unknown Face spike > 10x/day → Security alert
+
+### Email Digests tự động
+
+- **Weekly Department Digest**: Thứ 2 08:00 gửi cho PMs
+- **Monthly Executive Summary**: Ngày 1 hàng tháng gửi cho Directors
+
+#### Bước tiếp theo
+
+Tiến hành [Testing the System](../5.9-testing) để verify end-to-end analytics pipeline!
 
 **Get results:**
 ```bash

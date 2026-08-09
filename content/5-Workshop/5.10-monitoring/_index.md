@@ -6,44 +6,76 @@ chapter: false
 pre: " <b> 5.10. </b> "
 ---
 
-## Overview
+#### Overview
 
-Monitoring is **CRITICAL** for production systems. In this step, you will set up:
-- CloudWatch Logs aggregation
-- Custom metrics
-- CloudWatch Dashboard
-- Alarms for critical events
-- X-Ray tracing (optional)
+Monitoring is **CRITICAL** for production systems. In this step, you will set up a complete observability stack for the Smart Campus Platform:
+- CloudWatch Logs aggregation with structured JSON logging
+- Custom metrics for business KPIs
+- A CloudWatch Dashboard overview
+- Alarms for critical events (DLQ, Error rate, Latency, Throttles)
+- **AWS X-Ray Distributed Tracing** (essential for serverless debugging)
 
-## Why Monitoring?
+#### Why Do We Need Monitoring?
 
 **Without monitoring:**
-- ❌ Don't know when system fails
-- ❌ Can't detect performance degradation
-- ❌ Can't track usage patterns
-- ❌ Debugging is very hard during issues
+- ❌ You don't know when the system fails
+- ❌ You can't detect performance degradation
+- ❌ You can't track usage patterns
+- ❌ Debugging is extremely difficult when issues arise
 
 **With monitoring:**
-- ✅ Real-time error detection
-- ✅ Automatic alerts when thresholds exceeded
+- ✅ Detect failures in real-time
+- ✅ Automatic alerts when thresholds are exceeded
 - ✅ Analyze trends and patterns
-- ✅ Fast debugging with detailed logs
+- ✅ Debug quickly with detailed logs + distributed traces
 
-## Monitoring Architecture
+#### Monitoring Architecture (Observability Stack)
 
+```mermaid
+graph TB
+    subgraph "Sources"
+        Lambda[Lambda Functions]
+        APIGW[API Gateway]
+        EB[EventBridge]
+        SQS[SQS Queues]
+        DDB[DynamoDB]
+    end
+
+    subgraph "Collection"
+        CWLogs[CloudWatch Logs\nStructured JSON]
+        CWMetrics[CloudWatch Metrics\nCustom + AWS]
+        XRay[AWS X-Ray\nDistributed Tracing]
+    end
+
+    subgraph "Analysis"
+        CWDashboard[CloudWatch Dashboard]
+        CWInsights[CloudWatch Logs Insights]
+        XRayConsole[X-Ray Service Map]
+    end
+
+    subgraph "Alerting"
+        CWalarms[CloudWatch Alarms]
+        SNS[SNS Topics]
+        Email[Email/Slack/PagerDuty]
+    end
+
+    Lambda -->|Logs + Metrics + Traces| CWLogs
+    Lambda -->|Custom Metrics| CWMetrics
+    Lambda -.->|Trace Segments| XRay
+    APIGW -->|Access Logs| CWLogs
+    APIGW -->|Latency/4xx/5xx| CWMetrics
+    EB -->|Event Metrics| CWMetrics
+    SQS -->|Queue Depth/Age| CWMetrics
+    DDB -->|Throttles/Latency| CWMetrics
+    
+    CWLogs --> CWInsights
+    CWMetrics --> CWDashboard
+    CWMetrics --> CWalarms
+    XRay --> XRayConsole
+    CWalarms --> SNS --> Email
 ```
-[All Services]
-    ↓ Logs
-[CloudWatch Logs]
-    ↓ Metrics Filter
-[CloudWatch Metrics]
-    ↓ Threshold
-[CloudWatch Alarms]
-    ↓ Notification
-[SNS Topic] → Email/SMS
-```
 
-## Step 1: Create CloudWatch Log Groups
+#### Step 1: Create CloudWatch Log Groups
 
 **Lambda logs (auto-created, but verify):**
 ```bash
@@ -55,6 +87,9 @@ aws logs describe-log-groups \
 Expected:
 ```
 /aws/lambda/smart-campus-api
+/aws/lambda/smart-campus-analytics-worker
+/aws/lambda/smart-campus-notification-worker
+/aws/lambda/smart-campus-tasks-overdue-checker
 ```
 
 **API Gateway logs (created in step 6):**
@@ -77,10 +112,21 @@ aws logs put-retention-policy \
   --region ap-southeast-1
 ```
 
-## Step 2: Setup Structured Logging
+**EventBridge logs:**
+```bash
+aws logs create-log-group \
+  --log-group-name /aws/events/smart-campus \
+  --region ap-southeast-1
 
-**Best practice: Log JSON format for easy parsing**
+aws logs put-retention-policy \
+  --log-group-name /aws/events/smart-campus \
+  --retention-in-days 30 \
+  --region ap-southeast-1
+```
 
+#### Step 2: Set Up Structured JSON Logging (Best Practice)
+
+**app/core/logger.py:**
 ```python
 # app/core/logger.py
 import json
@@ -102,51 +148,440 @@ class JSONFormatter(logging.Formatter):
         if record.exc_info:
             log_data['exception'] = self.formatException(record.exc_info)
         
-        # Add custom fields
-        if hasattr(record, 'user_id'):
-            log_data['user_id'] = record.user_id
-        if hasattr(record, 'request_id'):
-            log_data['request_id'] = record.request_id
+        # Add custom fields from extra
+        for key, value in record.__dict__.items():
+            if key not in ['name', 'msg', 'args', 'created', 'filename', 'funcName',
+                          'levelname', 'levelno', 'lineno', 'module', 'msecs',
+                          'message', 'pathname', 'process', 'processName',
+                          'relativeCreated', 'thread', 'threadName', 'exc_info',
+                          'exc_text', 'stack_info', 'getMessage']:
+                log_data[key] = value
         
-        return json.dumps(log_data)
+        return json.dumps(log_data, ensure_ascii=False)
 
-# Configure logger
-logger = logging.getLogger('smart-campus')
-logger.setLevel(logging.INFO)
+# Configure root logger
+def setup_logger(name='smart-campus'):
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+    
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(JSONFormatter())
+        logger.addHandler(handler)
+    
+    return logger
 
-handler = logging.StreamHandler()
-handler.setFormatter(JSONFormatter())
-logger.addHandler(handler)
+logger = setup_logger()
 ```
 
-**Usage:**
+**Usage in code:**
 ```python
 from app.core.logger import logger
 
 # Basic log
 logger.info("User logged in")
 
-# Log with context
+# Log with business context (extra fields)
 logger.info("Attendance recorded", extra={
     'user_id': 'user-001',
     'request_id': 'req-123',
-    'status': 'PRESENT'
+    'attendance_id': 'att-abc123',
+    'status': 'PRESENT',
+    'session_type': 'MORNING',
+    'confidence': 98.5,
+    'camera_id': 'camera-01'
 })
 
-# Log error
+# Log error with full context
 try:
     result = recognize_face(image)
 except Exception as e:
     logger.error("Face recognition failed", exc_info=True, extra={
         'user_id': user_id,
-        'error_type': type(e).__name__
+        'error_type': type(e).__name__,
+        'camera_id': camera_id,
+        'image_size_bytes': len(image_base64)
     })
 ```
 
-## Step 3: Create CloudWatch Metrics Filter
+#### Step 3: Enable AWS X-Ray Distributed Tracing
 
-**Metric 1: Attendance success rate**
+**1. Install the X-Ray SDK:**
+```bash
+# requirements.txt
+aws-xray-sdk==2.12.1
+```
 
+**2. Patch all libraries (app/main.py):**
+```python
+# app/main.py - FIRST LINES before any imports
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
+
+# Patch all supported libraries (boto3, requests, sqlite3, etc.)
+patch_all()
+
+# Configure X-Ray recorder
+xray_recorder.configure(
+    service='smart-campus-api',
+    sampling=False,  # Disable sampling for dev, enable for prod
+    context_missing='LOG_ERROR'
+)
+
+# Now import other modules
+from fastapi import FastAPI
+# ... rest of imports
+```
+
+**3. Add X-Ray middleware for FastAPI:**
+```python
+# app/core/xray_middleware.py
+from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
+# For FastAPI, use manual segment management
+
+from aws_xray_sdk.core import xray_recorder
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class XRayMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        # Start segment
+        xray_recorder.begin_segment('smart-campus-api')
+        
+        # Add request annotations
+        xray_recorder.put_annotation('http.method', request.method)
+        xray_recorder.put_annotation('http.url', str(request.url))
+        
+        try:
+            response = await call_next(request)
+            xray_recorder.put_annotation('http.status', response.status_code)
+            return response
+        except Exception as e:
+            xray_recorder.put_annotation('error', True)
+            xray_recorder.put_metadata('exception', str(e))
+            raise
+        finally:
+            xray_recorder.end_segment()
+
+# Add to app
+app.add_middleware(XRayMiddleware)
+```
+
+**4. IAM Permissions for X-Ray (Lambda role):**
+```json
+{
+  "Sid": "XRayAccess",
+  "Effect": "Allow",
+  "Action": [
+    "xray:PutTraceSegments",
+    "xray:PutTelemetryRecords",
+    "xray:GetSamplingRules",
+    "xray:GetSamplingTargets"
+  ],
+  "Resource": "*"
+}
+```
+
+#### Step 4: Create CloudWatch Metric Filters (Business KPIs)
+
+**Metric 1: Attendance Success Rate**
+```bash
+# Filter pattern for successful attendance
+aws logs put-metric-filter \
+  --log-group-name /aws/lambda/smart-campus-api \
+  --filter-name AttendanceSuccess \
+  --filter-pattern '{ $.status = "PRESENT" || $.status = "LATE" }' \
+  --metric-transformations \
+    metricName=AttendanceSuccess,metricNamespace=SmartCampus,metricValue=1 \
+  --region ap-southeast-1
+```
+
+**Metric 2: Liveness Check Failures (Security)**
+```bash
+aws logs put-metric-filter \
+  --log-group-name /aws/lambda/smart-campus-api \
+  --filter-name LivenessFailure \
+  --filter-pattern '{ $.error = "Liveness check failed" }' \
+  --metric-transformations \
+    metricName=LivenessFailure,metricNamespace=SmartCampus,metricValue=1 \
+  --region ap-southeast-1
+```
+
+**Metric 3: Unknown Face Detected (Security)**
+```bash
+aws logs put-metric-filter \
+  --log-group-name /aws/lambda/smart-campus-api \
+  --filter-name UnknownFace \
+  --filter-pattern '{ $.error = "Unknown face" }' \
+  --metric-transformations \
+    metricName=UnknownFace,metricNamespace=SmartCampus,metricValue=1 \
+  --region ap-southeast-1
+```
+
+**Metric 4: Lambda Errors**
+```bash
+aws logs put-metric-filter \
+  --log-group-name /aws/lambda/smart-campus-api \
+  --filter-name LambdaErrors \
+  --filter-pattern 'ERROR' \
+  --metric-transformations \
+    metricName=LambdaErrors,metricNamespace=SmartCampus,metricValue=1 \
+  --region ap-southeast-1
+```
+
+**Metric 5: SQS DLQ Messages (Critical)**
+```bash
+aws logs put-metric-filter \
+  --log-group-name /aws/lambda/smart-campus-analytics-worker \
+  --filter-name DLQMessages \
+  --filter-pattern '{ $.eventSource = "aws:sqs" && $.eventSourceARN = "*dlq*" }' \
+  --metric-transformations \
+    metricName=DLQMessages,metricNamespace=SmartCampus,metricValue=1 \
+  --region ap-southeast-1
+```
+
+#### Step 5: Create CloudWatch Alarms
+
+**Alarm 1: High Error Rate**
+```bash
+aws cloudwatch put-metric-alarm \
+  --alarm-name SmartCampus-HighErrorRate \
+  --alarm-description "Lambda error rate > 5% in 5 minutes" \
+  --metric-name LambdaErrors \
+  --namespace SmartCampus \
+  --statistic Sum \
+  --period 300 \
+  --evaluation-periods 1 \
+  --threshold 5 \
+  --comparison-operator GreaterThanThreshold \
+  --alarm-actions arn:aws:sns:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-alerts \
+  --region ap-southeast-1
+```
+
+**Alarm 2: Liveness Failure Spike (Attack Detection)**
+```bash
+aws cloudwatch put-metric-alarm \
+  --alarm-name SmartCampus-LivenessFailureSpike \
+  --alarm-description "Liveness failures > 10 in 5 minutes (possible attack)" \
+  --metric-name LivenessFailure \
+  --namespace SmartCampus \
+  --statistic Sum \
+  --period 300 \
+  --evaluation-periods 1 \
+  --threshold 10 \
+  --comparison-operator GreaterThanThreshold \
+  --alarm-actions arn:aws:sns:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-security-alerts \
+  --region ap-southeast-1
+```
+
+**Alarm 3: DLQ Messages (Data Loss Risk)**
+```bash
+aws cloudwatch put-metric-alarm \
+  --alarm-name SmartCampus-DLQMessages \
+  --alarm-description "Messages in Dead Letter Queue - immediate investigation needed" \
+  --metric-name DLQMessages \
+  --namespace SmartCampus \
+  --statistic Sum \
+  --period 60 \
+  --evaluation-periods 1 \
+  --threshold 1 \
+  --comparison-operator GreaterThanOrEqualToThreshold \
+  --alarm-actions arn:aws:sns:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-critical-alerts \
+  --region ap-southeast-1
+```
+
+**Alarm 4: API Gateway 5xx Errors**
+```bash
+aws cloudwatch put-metric-alarm \
+  --alarm-name SmartCampus-API5xxErrors \
+  --alarm-description "API Gateway 5xx errors > 1% in 5 minutes" \
+  --metric-name 5XXError \
+  --namespace AWS/ApiGateway \
+  --dimensions Name=ApiName,Value=smart-campus-api \
+  --statistic Average \
+  --period 300 \
+  --evaluation-periods 1 \
+  --threshold 0.01 \
+  --comparison-operator GreaterThanThreshold \
+  --alarm-actions arn:aws:sns:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-alerts \
+  --region ap-southeast-1
+```
+
+**Alarm 5: Lambda Throttles (Concurrency Limit)**
+```bash
+aws cloudwatch put-metric-alarm \
+  --alarm-name SmartCampus-LambdaThrottles \
+  --alarm-description "Lambda throttles detected - concurrency limit reached" \
+  --metric-name Throttles \
+  --namespace AWS/Lambda \
+  --dimensions Name=FunctionName,Value=smart-campus-api \
+  --statistic Sum \
+  --period 300 \
+  --evaluation-periods 1 \
+  --threshold 1 \
+  --comparison-operator GreaterThanOrEqualToThreshold \
+  --alarm-actions arn:aws:sns:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-alerts \
+  --region ap-southeast-1
+```
+
+#### Step 6: Create a CloudWatch Dashboard
+
+```bash
+cat > dashboard.json <<'EOF'
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "x": 0, "y": 0, "width": 12, "height": 6,
+      "properties": {
+        "metrics": [
+          ["SmartCampus", "AttendanceSuccess"],
+          ["SmartCampus", "LivenessFailure"],
+          ["SmartCampus", "UnknownFace"],
+          ["SmartCampus", "LambdaErrors"]
+        ],
+        "period": 300,
+        "stat": "Sum",
+        "region": "ap-southeast-1",
+        "title": "Business KPIs - Attendance & Security",
+        "yAxis": { "left": { "min": 0 } }
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 0, "width": 12, "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/Lambda", "Duration", "FunctionName", "smart-campus-api"],
+          ["AWS/Lambda", "Invocations", "FunctionName", "smart-campus-api"],
+          ["AWS/Lambda", "Errors", "FunctionName", "smart-campus-api"],
+          ["AWS/Lambda", "Throttles", "FunctionName", "smart-campus-api"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "ap-southeast-1",
+        "title": "Lambda Performance - Main API"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0, "y": 6, "width": 12, "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/ApiGateway", "Latency", "ApiName", "smart-campus-api"],
+          ["AWS/ApiGateway", "5XXError", "ApiName", "smart-campus-api"],
+          ["AWS/ApiGateway", "4XXError", "ApiName", "smart-campus-api"],
+          ["AWS/ApiGateway", "Count", "ApiName", "smart-campus-api"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "ap-southeast-1",
+        "title": "API Gateway Metrics"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12, "y": 6, "width": 12, "height": 6,
+      "properties": {
+        "metrics": [
+          ["AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "smart-campus-analytics-queue"],
+          ["AWS/SQS", "ApproximateNumberOfMessagesVisible", "QueueName", "smart-campus-notification-queue"],
+          ["AWS/SQS", "ApproximateAgeOfOldestMessage", "QueueName", "smart-campus-analytics-queue"],
+          ["AWS/SQS", "NumberOfMessagesSent", "QueueName", "smart-campus-analytics-queue"]
+        ],
+        "period": 300,
+        "stat": "Average",
+        "region": "ap-southeast-1",
+        "title": "SQS Queue Health"
+      }
+    },
+    {
+      "type": "log",
+      "x": 0, "y": 12, "width": 24, "height": 8,
+      "properties": {
+        "query": "SOURCE '/aws/lambda/smart-campus-api' | fields @timestamp, @message\n| filter @message like /ERROR/\n| sort @timestamp desc\n| limit 20",
+        "region": "ap-southeast-1",
+        "title": "Recent Errors (Logs Insights)",
+        "stacked": false
+      }
+    }
+  ]
+}
+EOF
+
+aws cloudwatch put-dashboard \
+  --dashboard-name SmartCampus-Production \
+  --dashboard-body file://dashboard.json \
+  --region ap-southeast-1
+```
+
+#### Step 7: SNS Topics for Alerting
+
+```bash
+# Critical alerts (DLQ, Security)
+aws sns create-topic --name smart-campus-critical-alerts --region ap-southeast-1
+aws sns subscribe \
+  --topic-arn arn:aws:sns:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-critical-alerts \
+  --protocol email \
+  --notification-endpoint admin@company.com \
+  --region ap-southeast-1
+
+# General alerts (Errors, Throttles, 5xx)
+aws sns create-topic --name smart-campus-alerts --region ap-southeast-1
+aws sns subscribe \
+  --topic-arn arn:aws:sns:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-alerts \
+  --protocol email \
+  --notification-endpoint devops@company.com \
+  --region ap-southeast-1
+
+# Security alerts (Liveness, Unknown face)
+aws sns create-topic --name smart-campus-security-alerts --region ap-southeast-1
+aws sns subscribe \
+  --topic-arn arn:aws:sns:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-security-alerts \
+  --protocol email \
+  --notification-endpoint security@company.com \
+  --region ap-southeast-1
+```
+
+#### Step 8: Verify the Monitoring Setup
+
+```bash
+# 1. Check log groups exist
+aws logs describe-log-groups --log-group-name-prefix /aws/lambda/smart-campus --region ap-southeast-1
+
+# 2. Check metric filters
+aws logs describe-metric-filters --log-group-name /aws/lambda/smart-campus-api --region ap-southeast-1
+
+# 3. Check alarms
+aws cloudwatch describe-alarms --alarm-name-prefix SmartCampus --region ap-southeast-1
+
+# 4. Check dashboard
+aws cloudwatch get-dashboard --dashboard-name SmartCampus-Production --region ap-southeast-1
+
+# 5. Test X-Ray tracing
+# Make a request to API, then check X-Ray console for service map
+# Should show: API Gateway -> Lambda -> DynamoDB/Rekognition/EventBridge
+
+# 6. Generate test alarm
+aws cloudwatch set-alarm-state \
+  --alarm-name SmartCampus-HighErrorRate \
+  --state-value ALARM \
+  --state-reason "Test alarm" \
+  --region ap-southeast-1
+```
+
+#### Troubleshooting
+
+| Issue | Solution |
+|:---|:---|
+| X-Ray traces not showing | Check IAM permissions, verify `patch_all()` is called before imports, check sampling rules |
+| Metrics not appearing | Wait 5-10 min for the metric filter to process, check filter pattern syntax |
+| Alarms not triggering | Verify SNS topic ARN, check alarm period/evaluation-periods, test with `set-alarm-state` |
+| Dashboard empty | Ensure the metrics namespace matches, check the region, wait for data points |
+| High Lambda duration | Enable X-Ray, check the service map for bottlenecks (DynamoDB? Rekognition? Cold start?) |
+
+#### Next Step
+
+Proceed to [Step 11: Security and Optimization](../5.11-optimization) to harden security and optimize costs!
 ```bash
 aws logs put-metric-filter \
   --log-group-name /aws/lambda/smart-campus-api \
@@ -181,7 +616,7 @@ aws logs put-metric-filter \
   --region ap-southeast-1
 ```
 
-**Metric 4: API latency (high latency requests)**
+**Metric 4: API latency (high-latency requests)**
 
 ```bash
 aws logs put-metric-filter \
@@ -193,9 +628,9 @@ aws logs put-metric-filter \
   --region ap-southeast-1
 ```
 
-## Step 4: Create Custom CloudWatch Dashboard
+#### Step 4: Create a Custom CloudWatch Dashboard
 
-**Create dashboard:**
+**Create the dashboard:**
 
 ```bash
 cat > dashboard-config.json <<'EOF'
@@ -289,12 +724,12 @@ aws cloudwatch put-dashboard \
   --region ap-southeast-1
 ```
 
-**View dashboard:**
+**View the dashboard:**
 ```
 https://console.aws.amazon.com/cloudwatch/home?region=ap-southeast-1#dashboards:name=SmartCampusDashboard
 ```
 
-## Step 5: Create CloudWatch Alarms
+#### Step 5: Create CloudWatch Alarms
 
 **Alarm 1: High error rate**
 
@@ -312,9 +747,9 @@ aws sns subscribe \
   --region ap-southeast-1
 ```
 
-**Confirm subscription** (check email inbox)
+**Confirm the subscription** (check your email inbox)
 
-**Create alarm:**
+**Create the alarm:**
 ```bash
 aws cloudwatch put-metric-alarm \
   --alarm-name HighErrorRate \
@@ -383,9 +818,9 @@ aws cloudwatch put-metric-alarm \
   --region ap-southeast-1
 ```
 
-## Step 6: CloudWatch Insights Queries
+#### Step 6: CloudWatch Insights Queries
 
-**Query 1: Top errors in last 1 hour**
+**Query 1: Top errors in the last hour**
 
 ```
 SOURCE '/aws/lambda/smart-campus-api'
@@ -416,7 +851,7 @@ SOURCE '/aws/apigateway/smart-campus-api'
 | limit 50
 ```
 
-**Query 3: Users with most check-ins**
+**Query 3: Users with the most check-ins**
 
 ```
 SOURCE '/aws/lambda/smart-campus-api'
@@ -436,7 +871,7 @@ SOURCE '/aws/lambda/smart-campus-api'
 | stats count() as error_count by bin(5m)
 ```
 
-## Step 7: Setup X-Ray Tracing (Advanced)
+#### Step 7: Set Up X-Ray Tracing (Advanced)
 
 **Enable X-Ray for Lambda:**
 
@@ -460,7 +895,7 @@ aws apigatewayv2 update-stage \
   --region ap-southeast-1
 ```
 
-**Add X-Ray SDK to Python code:**
+**Add the X-Ray SDK to your Python code:**
 
 ```python
 # requirements.txt
@@ -479,23 +914,23 @@ from aws_xray_sdk.core import patch_all
 patch_all()
 ```
 
-**View traces:**
+**View the traces:**
 ```
 https://console.aws.amazon.com/xray/home?region=ap-southeast-1#/service-map
 ```
 
-## Step 8: Cost Optimization for Logs
+#### Step 8: Cost Optimization for Logs
 
 **Reduce log retention:**
 
 ```bash
-# Keep Lambda logs 7 days only
+# Keep Lambda logs for 7 days only
 aws logs put-retention-policy \
   --log-group-name /aws/lambda/smart-campus-api \
   --retention-in-days 7 \
   --region ap-southeast-1
 
-# Keep API Gateway logs 3 days
+# Keep API Gateway logs for 3 days
 aws logs put-retention-policy \
   --log-group-name /aws/apigateway/smart-campus-api \
   --retention-in-days 3 \
@@ -514,20 +949,20 @@ aws logs create-export-task \
   --region ap-southeast-1
 ```
 
-## Monitoring Best Practices
+#### Monitoring Best Practices
 
 1. **Log levels:**
-   - ERROR: Actual errors needing action
+   - ERROR: Actual errors requiring action
    - WARN: Potential issues
-   - INFO: Normal operations (attendance, login...)
-   - DEBUG: Detailed debugging (only when debugging)
+   - INFO: Normal operations (attendance, login, etc.)
+   - DEBUG: Detailed debugging (use only when debugging)
 
 2. **Correlation IDs:**
-   - Add request_id to every log
-   - Trace request across multiple services
+   - Add a request_id to every log
+   - Trace a request across multiple services
 
 3. **Alert fatigue:**
-   - Only alert for critical issues
+   - Only alert on critical issues
    - Tune thresholds to avoid false positives
 
 4. **Dashboard design:**
@@ -535,9 +970,9 @@ aws logs create-export-task \
    - Middle: Technical metrics (latency, errors)
    - Bottom: Infrastructure metrics (CPU, memory)
 
-## Testing Alarms
+#### Testing Alarms
 
-**Trigger high error rate alarm:**
+**Trigger the high error rate alarm:**
 
 ```bash
 # Generate errors
@@ -546,7 +981,7 @@ for i in {1..20}; do
 done
 ```
 
-**Check alarm state:**
+**Check the alarm state:**
 ```bash
 aws cloudwatch describe-alarms \
   --alarm-names HighErrorRate \
@@ -556,9 +991,9 @@ aws cloudwatch describe-alarms \
 
 Expected: `ALARM` (after 2 evaluation periods)
 
-**Check SNS notification in email**
+**Check for the SNS notification in your email**
 
-## Cost Estimation
+#### Cost Estimation
 
 **CloudWatch pricing:**
 - Logs ingestion: $0.50/GB
@@ -579,35 +1014,35 @@ Expected: `ALARM` (after 2 evaluation periods)
 - 10 custom metrics
 - 10 alarms
 
-→ Workshop likely stays in free tier!
+→ The workshop will likely stay within the free tier!
 
-## Troubleshooting
+#### Troubleshooting
 
 **Issue: Metrics not showing up**
-- Wait 5-10 minutes (metrics delayed)
-- Check metric filter pattern correct
-- Verify log group name correct
+- Wait 5-10 minutes (metrics are delayed)
+- Check that the metric filter pattern is correct
+- Verify the log group name is correct
 
 **Issue: Alarm not triggering**
-- Check threshold settings
-- Verify SNS subscription confirmed
-- Check evaluation periods
+- Check the threshold settings
+- Verify the SNS subscription is confirmed
+- Check the evaluation periods
 
 **Issue: Dashboard blank**
-- Check region correct
-- Verify metrics exist
-- Check time range
+- Check that the region is correct
+- Verify the metrics exist
+- Check the time range
 
-## Verify Setup
+#### Verify the Setup
 
 Checklist:
-- [ ] All log groups exist and configured
-- [ ] Metrics filters created
+- [ ] All log groups exist and are configured
+- [ ] Metric filters created
 - [ ] Dashboard showing data
 - [ ] Alarms created and ACTIVE
 - [ ] SNS topic subscribed
 - [ ] Test alarm triggered successfully
 
-## Next Step
+#### Next Step
 
-Proceed to [Step 11: Security and Optimization](../5.11-optimization) to optimize the system!
+Move on to [Step 11: Security and Optimization](../5.11-optimization) to optimize the system!

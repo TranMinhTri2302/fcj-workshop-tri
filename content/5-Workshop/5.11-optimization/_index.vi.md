@@ -8,19 +8,23 @@ pre: " <b> 5.11. </b> "
 
 #### Tổng quan
 
-Đây là bước **QUAN TRỌNG** để đảm bảo hệ thống:
-- ✅ **Secure**: IAM least privilege, WAF, encryption
-- ✅ **Performant**: Lambda tuning, caching
-- ✅ **Cost-optimized**: Right-sizing, reserved capacity
-- ✅ **Reliable**: Multi-AZ, backup, disaster recovery
+Đây là bước **QUAN TRỌNG** để đảm bảo hệ thống Smart Campus Platform đạt tiêu chuẩn production:
+- ✅ **Secure**: IAM Least Privilege, WAF IP Whitelist, Encryption at rest/in transit
+- ✅ **Performant**: Lambda tuning (memory, provisioned concurrency), Caching
+- ✅ **Cost-optimized**: Right-sizing, S3 Lifecycle, Firehose buffering, Athena partition pruning
+- ✅ **Reliable**: Multi-AZ, Backup/Restore, Disaster Recovery, DLQ monitoring
 
-#### Phần 1: Security Hardening
+---
 
-**1.1. IAM Least Privilege Policy**
+## Phần 1: Security Hardening (Cứng hóa bảo mật)
 
-**Current issue:** Lambda role có quyền quá rộng (FullAccess policies)
+### 1.1. IAM Least Privilege Policy (Quyền tối thiểu)
 
-**Solution:** Tạo custom policy với chỉ permissions cần thiết
+**Vấn đề hiện tại:** Lambda role sử dụng FullAccess policies (quá rộng, rủi ro bảo mật)
+
+**Giải pháp:** Tạo custom policy chỉ cấp permissions thực sự cần thiết cho từng Lambda function
+
+**Policy cho Main API Lambda (`smart-campus-api`):**
 
 ```bash
 cat > lambda-least-privilege-policy.json <<'EOF'
@@ -35,13 +39,20 @@ cat > lambda-least-privilege-policy.json <<'EOF'
         "dynamodb:PutItem",
         "dynamodb:UpdateItem",
         "dynamodb:Query",
-        "dynamodb:Scan"
+        "dynamodb:Scan",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:BatchGetItem"
       ],
       "Resource": [
-        "arn:aws:dynamodb:ap-southeast-1:*:table/smart-campus-users",
-        "arn:aws:dynamodb:ap-southeast-1:*:table/smart-campus-faces",
-        "arn:aws:dynamodb:ap-southeast-1:*:table/smart-campus-attendance",
-        "arn:aws:dynamodb:ap-southeast-1:*:table/smart-campus-*/index/*"
+        "arn:aws:dynamodb:ap-southeast-1:${AWS_ACCOUNT_ID}:table/smart-campus-users",
+        "arn:aws:dynamodb:ap-southeast-1:${AWS_ACCOUNT_ID}:table/smart-campus-faces",
+        "arn:aws:dynamodb:ap-southeast-1:${AWS_ACCOUNT_ID}:table/smart-campus-attendance",
+        "arn:aws:dynamodb:ap-southeast-1:${AWS_ACCOUNT_ID}:table/smart-campus-tasks",
+        "arn:aws:dynamodb:ap-southeast-1:${AWS_ACCOUNT_ID}:table/smart-campus-leaves",
+        "arn:aws:dynamodb:ap-southeast-1:${AWS_ACCOUNT_ID}:table/smart-campus-notifications",
+        "arn:aws:dynamodb:ap-southeast-1:${AWS_ACCOUNT_ID}:table/smart-campus-security",
+        "arn:aws:dynamodb:ap-southeast-1:${AWS_ACCOUNT_ID}:table/smart-campus-holidays",
+        "arn:aws:dynamodb:ap-southeast-1:${AWS_ACCOUNT_ID}:table/smart-campus-*/index/*"
       ]
     },
     {
@@ -51,34 +62,75 @@ cat > lambda-least-privilege-policy.json <<'EOF'
         "rekognition:IndexFaces",
         "rekognition:SearchFacesByImage",
         "rekognition:CreateFaceLivenessSession",
-        "rekognition:GetFaceLivenessSessionResults"
+        "rekognition:GetFaceLivenessSessionResults",
+        "rekognition:ListFaces",
+        "rekognition:DeleteFaces"
       ],
-      "Resource": "*"
+      "Resource": "arn:aws:rekognition:ap-southeast-1:${AWS_ACCOUNT_ID}:collection/smart-campus-faces"
     },
     {
       "Sid": "S3Access",
       "Effect": "Allow",
       "Action": [
         "s3:GetObject",
-        "s3:PutObject"
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:GetObjectVersion"
       ],
-      "Resource": "arn:aws:s3:::smart-campus-*/*"
+      "Resource": [
+        "arn:aws:s3:::smart-campus-images-${AWS_ACCOUNT_ID}/*",
+        "arn:aws:s3:::smart-campus-datalake-${AWS_ACCOUNT_ID}/*"
+      ]
     },
     {
       "Sid": "EventBridgePublish",
       "Effect": "Allow",
       "Action": "events:PutEvents",
-      "Resource": "arn:aws:events:ap-southeast-1:*:event-bus/smart-campus-events"
+      "Resource": "arn:aws:events:ap-southeast-1:${AWS_ACCOUNT_ID}:event-bus/smart-campus-events"
     },
     {
       "Sid": "SQSAccess",
       "Effect": "Allow",
       "Action": [
-        "sqs:ReceiveMessage",
-        "sqs:DeleteMessage",
-        "sqs:GetQueueAttributes"
+        "sqs:SendMessage",
+        "sqs:SendMessageBatch"
       ],
-      "Resource": "arn:aws:sqs:ap-southeast-1:*:smart-campus-*"
+      "Resource": [
+        "arn:aws:sqs:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-analytics-queue",
+        "arn:aws:sqs:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-notification-queue"
+      ]
+    },
+    {
+      "Sid": "SNSAccess",
+      "Effect": "Allow",
+      "Action": [
+        "sns:Publish"
+      ],
+      "Resource": "arn:aws:sns:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-*"
+    },
+    {
+      "Sid": "CognitoAccess",
+      "Effect": "Allow",
+      "Action": [
+        "cognito-idp:AdminCreateUser",
+        "cognito-idp:AdminSetUserPassword",
+        "cognito-idp:AdminUpdateUserAttributes",
+        "cognito-idp:AdminDeleteUser",
+        "cognito-idp:AdminGetUser",
+        "cognito-idp:ListUsers",
+        "cognito-idp:AdminInitiateAuth",
+        "cognito-idp:AdminRespondToAuthChallenge"
+      ],
+      "Resource": "arn:aws:cognito-idp:ap-southeast-1:${AWS_ACCOUNT_ID}:userpool/*"
+    },
+    {
+      "Sid": "WAFAccess",
+      "Effect": "Allow",
+      "Action": [
+        "wafv2:GetIPSet",
+        "wafv2:UpdateIPSet"
+      ],
+      "Resource": "arn:aws:wafv2:ap-southeast-1:${AWS_ACCOUNT_ID}:regional/ipset/SmartCampusIPSet/*"
     },
     {
       "Sid": "CloudWatchLogs",
@@ -88,48 +140,237 @@ cat > lambda-least-privilege-policy.json <<'EOF'
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:ap-southeast-1:*:log-group:/aws/lambda/smart-campus-*"
+      "Resource": "arn:aws:logs:ap-southeast-1:${AWS_ACCOUNT_ID}:log-group:/aws/lambda/smart-campus-*"
+    },
+    {
+      "Sid": "XRayAccess",
+      "Effect": "Allow",
+      "Action": [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords",
+        "xray:GetSamplingRules",
+        "xray:GetSamplingTargets"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "AthenaAccess",
+      "Effect": "Allow",
+      "Action": [
+        "athena:StartQueryExecution",
+        "athena:GetQueryExecution",
+        "athena:GetQueryResults",
+        "athena:GetWorkGroup"
+      ],
+      "Resource": "arn:aws:athena:ap-southeast-1:${AWS_ACCOUNT_ID}:workgroup/smart-campus-workgroup"
+    },
+    {
+      "Sid": "GlueAccess",
+      "Effect": "Allow",
+      "Action": [
+        "glue:GetTable",
+        "glue:GetTables",
+        "glue:GetDatabase",
+        "glue:GetDatabases",
+        "glue:GetPartition",
+        "glue:GetPartitions"
+      ],
+      "Resource": [
+        "arn:aws:glue:ap-southeast-1:${AWS_ACCOUNT_ID}:catalog",
+        "arn:aws:glue:ap-southeast-1:${AWS_ACCOUNT_ID}:database/smart_campus_db",
+        "arn:aws:glue:ap-southeast-1:${AWS_ACCOUNT_ID}:table/smart_campus_db/*"
+      ]
+    },
+    {
+      "Sid": "KMSAccess",
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt",
+        "kms:GenerateDataKey"
+      ],
+      "Resource": "arn:aws:kms:ap-southeast-1:${AWS_ACCOUNT_ID}:key/*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": [
+            "dynamodb.ap-southeast-1.amazonaws.com",
+            "s3.ap-southeast-1.amazonaws.com"
+          ]
+        }
+      }
     }
   ]
 }
 EOF
 
-# Update Lambda role
+# Apply policy to Lambda role
 aws iam put-role-policy \
   --role-name SmartCampusLambdaRole \
   --policy-name LeastPrivilegePolicy \
   --policy-document file://lambda-least-privilege-policy.json
 ```
 
-**1.2. Enable WAF (Web Application Firewall)**
+**Policy cho Analytics Worker Lambda (`smart-campus-analytics-worker`):**
 
 ```bash
-# Create IP set for rate limiting
+cat > analytics-worker-policy.json <<'EOF'
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3DataLakeWrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectTagging"
+      ],
+      "Resource": "arn:aws:s3:::smart-campus-datalake-${AWS_ACCOUNT_ID}/*"
+    },
+    {
+      "Sid": "FirehoseAccess",
+      "Effect": "Allow",
+      "Action": [
+        "firehose:PutRecord",
+        "firehose:PutRecordBatch"
+      ],
+      "Resource": "arn:aws:firehose:ap-southeast-1:${AWS_ACCOUNT_ID}:deliverystream/smart-campus-attendance-stream"
+    },
+    {
+      "Sid": "SQSReceive",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:ReceiveMessage",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes"
+      ],
+      "Resource": "arn:aws:sqs:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-analytics-queue"
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:ap-southeast-1:${AWS_ACCOUNT_ID}:log-group:/aws/lambda/smart-campus-analytics-worker*"
+    }
+  ]
+}
+EOF
+```
+
+**Policy cho Notification Worker Lambda (`smart-campus-notification-worker`):**
+
+```bash
+cat > notification-worker-policy.json <<'EOF'
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "SNSAccess",
+      "Effect": "Allow",
+      "Action": [
+        "sns:Publish"
+      ],
+      "Resource": "arn:aws:sns:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-*"
+    },
+    {
+      "Sid": "SESAccess",
+      "Effect": "Allow",
+      "Action": [
+        "ses:SendEmail",
+        "ses:SendRawEmail"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SQSReceive",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:ReceiveMessage",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes"
+      ],
+      "Resource": "arn:aws:sqs:ap-southeast-1:${AWS_ACCOUNT_ID}:smart-campus-notification-queue"
+    },
+    {
+      "Sid": "CloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:ap-southeast-1:${AWS_ACCOUNT_ID}:log-group:/aws/lambda/smart-campus-notification-worker*"
+    }
+  ]
+}
+EOF
+```
+
+### 1.2. WAF (Web Application Firewall) - IP Whitelist cho Attendance
+
+**Mục đích:** Chỉ cho phép check-in/check-out từ mạng công ty (IP whitelist)
+
+```bash
+# 1. Tạo IP Set cho mạng công ty
 aws wafv2 create-ip-set \
-  --name smart-campus-blocked-ips \
+  --name SmartCampusIPSet \
   --scope REGIONAL \
   --ip-address-version IPV4 \
-  --addresses \
+  --addresses "203.0.113.0/24" "198.51.100.0/24" \
+  --description "Company office IP ranges for attendance check-in" \
   --region ap-southeast-1
 
-# Create Web ACL
-cat > waf-rules.json <<'EOF'
+# 2. Tạo Web ACL với rule IP whitelist
+cat > waf-webacl.json <<'EOF'
 {
   "Name": "smart-campus-waf",
   "Scope": "REGIONAL",
   "DefaultAction": {
-    "Allow": {}
+    "Block": {}
   },
+  "Description": "WAF for Smart Campus - IP whitelist for attendance",
   "Rules": [
     {
-      "Name": "RateLimitRule",
+      "Name": "IPWhitelistRule",
       "Priority": 1,
-      "Statement": {
-        "RateBasedStatement": {
-          "Limit": 2000,
-          "AggregateKeyType": "IP"
-        }
+      "Action": {
+        "Allow": {}
       },
+      "VisibilityConfig": {
+        "SampledRequestsEnabled": true,
+        "CloudWatchMetricsEnabled": true,
+        "MetricName": "IPWhitelistRule"
+      },
+      "Statement": {
+        "IPSetReferenceStatement": {
+          "ARN": "arn:aws:wafv2:ap-southeast-1:${AWS_ACCOUNT_ID}:regional/ipset/SmartCampusIPSet/xxx"
+        }
+      }
+    },
+    {
+      "Name": "AWSManagedRulesCommonRuleSet",
+      "Priority": 2,
+      "OverrideAction": {
+        "Count": {}
+      },
+      "VisibilityConfig": {
+        "SampledRequestsEnabled": true,
+        "CloudWatchMetricsEnabled": true,
+        "MetricName": "CommonRuleSet"
+      },
+      "Statement": {
+        "ManagedRuleGroupStatement": {
+          "VendorName": "AWS",
+          "Name": "AWSManagedRulesCommonRuleSet",
+          "Version": "1.0"
+        }
+      }
+    },
+    {
+      "Name": "RateLimitRule",
+      "Priority": 3,
       "Action": {
         "Block": {}
       },
@@ -137,17 +378,512 @@ cat > waf-rules.json <<'EOF'
         "SampledRequestsEnabled": true,
         "CloudWatchMetricsEnabled": true,
         "MetricName": "RateLimitRule"
+      },
+      "Statement": {
+        "RateBasedStatement": {
+          "Limit": 2000,
+          "AggregateKeyType": "IP",
+          "ScopeDownStatement": {
+            "NotStatement": {
+              "Statement": {
+                "IPSetReferenceStatement": {
+                  "ARN": "arn:aws:wafv2:ap-southeast-1:${AWS_ACCOUNT_ID}:regional/ipset/SmartCampusIPSet/xxx"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "VisibilityConfig": {
+    "SampledRequestsEnabled": true,
+    "CloudWatchMetricsEnabled": true,
+    "MetricName": "SmartCampusWAF"
+  }
+}
+EOF
+
+# Create Web ACL
+aws wafv2 create-web-acl \
+  --cli-input-json file://waf-webacl.json \
+  --region ap-southeast-1
+
+# 3. Associate WAF với API Gateway Stage
+API_ID=$(aws apigatewayv2 get-apis --region ap-southeast-1 --query "Items[?Name=='smart-campus-api'].ApiId" --output text)
+aws wafv2 associate-web-acl \
+  --web-acl-arn arn:aws:wafv2:ap-southeast-1:${AWS_ACCOUNT_ID}:regional/webacl/smart-campus-waf/xxx \
+  --resource-arn arn:aws:apigateway:ap-southeast-1::/apis/${API_ID}/stages/prod \
+  --region ap-southeast-1
+```
+
+**Cập nhật IP Whitelist từ Admin UI (Backend integration):**
+```python
+# app/modules/security/service.py
+def update_waf_ip_set(new_ips: list[str]):
+    """Admin gọi API này để cập nhật IP whitelist"""
+    ip_set_arn = "arn:aws:wafv2:ap-southeast-1:xxx:regional/ipset/SmartCampusIPSet/xxx"
+    
+    # Get current lock token
+    response = wafv2.get_ip_set(Name="SmartCampusIPSet", Scope="REGIONAL", Id="xxx")
+    lock_token = response['LockToken']
+    
+    # Update IP set
+    wafv2.update_ip_set(
+        Name="SmartCampusIPSet",
+        Scope="REGIONAL",
+        Id="xxx",
+        Addresses=new_ips,
+        LockToken=lock_token
+    )
+```
+
+### 1.3. Encryption (Mã hóa)
+
+**S3 Buckets - SSE-S3 (AES256):**
+```bash
+# Images bucket
+aws s3api put-bucket-encryption \
+  --bucket smart-campus-images-${AWS_ACCOUNT_ID} \
+  --server-side-encryption-configuration '{
+    "Rules": [{
+      "ApplyServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+      }
+    }]
+  }' \
+  --region ap-southeast-1
+
+# Data Lake bucket
+aws s3api put-bucket-encryption \
+  --bucket smart-campus-datalake-${AWS_ACCOUNT_ID} \
+  --server-side-encryption-configuration '{
+    "Rules": [{
+      "ApplyServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+      }
+    }]
+  }' \
+  --region ap-southeast-1
+```
+
+**DynamoDB - Encryption at rest (AWS managed key):**
+```bash
+# Enable khi tạo table (hoặc update existing)
+aws dynamodb update-table \
+  --table-name smart-campus-users \
+  --sse-specification Enabled=true,SSEType=KMS \
+  --region ap-southeast-1
+```
+
+**Athena Query Results - SSE-S3:**
+```bash
+aws athena update-work-group \
+  --work-group smart-campus-workgroup \
+  --configuration "ResultConfigurationUpdates={EncryptionConfiguration={EncryptionOption=SSE_S3}}" \
+  --region ap-southeast-1
+```
+
+### 1.4. Cognito Security Enhancements
+
+```bash
+# 1. Enable MFA (Optional but recommended)
+aws cognito-idp set-user-pool-mfa-config \
+  --user-pool-id ap-southeast-1_xxxxxxxxx \
+  --mfa-configuration ON \
+  --region ap-southeast-1
+
+# 2. Password Policy
+aws cognito-idp update-user-pool \
+  --user-pool-id ap-southeast-1_xxxxxxxxx \
+  --policies '{
+    "PasswordPolicy": {
+      "MinimumLength": 12,
+      "RequireUppercase": true,
+      "RequireLowercase": true,
+      "RequireNumbers": true,
+      "RequireSymbols": true,
+      "TemporaryPasswordValidityDays": 7
+    }
+  }' \
+  --region ap-southeast-1
+
+# 3. Advanced Security (Risk-based auth)
+aws cognito-idp set-user-pool-mfa-config \
+  --user-pool-id ap-southeast-1_xxxxxxxxx \
+  --advanced-security-mode ENFORCED \
+  --region ap-southeast-1
+```
+
+---
+
+## Phần 2: Performance Optimization (Tối ưu hiệu năng)
+
+### 2.1. Lambda Tuning
+
+**Memory & CPU Optimization:**
+```bash
+# Test different memory sizes để tìm optimal (cost vs duration)
+# 128MB, 256MB, 512MB, 1024MB, 2048MB, 3008MB
+
+# Update function memory
+aws lambda update-function-configuration \
+  --function-name smart-campus-api \
+  --memory-size 1024 \
+  --region ap-southeast-1
+
+# Enable Provisioned Concurrency cho cold start elimination (production)
+aws lambda put-provisioned-concurrency-config \
+  --function-name smart-campus-api \
+  --qualifier prod \
+  --provisioned-concurrent-executions 10 \
+  --region ap-southeast-1
+```
+
+**Lambda Power Tuning (Automated):**
+```bash
+# Deploy AWS Lambda Power Tuning state machine
+# https://github.com/aws-samples/aws-lambda-power-tuning
+# Chạy để tìm memory size tối ưu cho cost/duration
+```
+
+### 2.2. API Gateway Caching
+
+```bash
+# Enable caching cho GET endpoints (users list, reports)
+aws apigatewayv2 update-stage \
+  --api-id ${API_ID} \
+  --stage-name prod \
+  --cache-cluster-enabled \
+  --cache-cluster-size 0.5 \
+  --region ap-southeast-1
+
+# Cache TTL: 300 seconds (5 minutes)
+# Cache key: query string parameters + headers (Authorization excluded)
+```
+
+### 2.3. DynamoDB Optimization
+
+**On-Demand vs Provisioned:**
+```bash
+# For predictable workloads, switch to Provisioned với Auto Scaling
+aws dynamodb update-table \
+  --table-name smart-campus-attendance \
+  --billing-mode PROVISIONED \
+  --provisioned-throughput ReadCapacityUnits=100,WriteCapacityUnits=50 \
+  --region ap-southeast-1
+
+# Enable Auto Scaling
+aws application-autoscaling register-scalable-target \
+  --service-namespace dynamodb \
+  --resource-id table/smart-campus-attendance \
+  --scalable-dimension dynamodb:table:ReadCapacityUnits \
+  --min-capacity 10 \
+  --max-capacity 1000 \
+  --region ap-southeast-1
+```
+
+**GSI Optimization:**
+- Chỉ project attributes cần thiết (KEYS_ONLY hoặc INCLUDE specific attributes)
+- Avoid projecting large attributes (images, long descriptions)
+
+### 2.4. Frontend Optimization (React + Vite)
+
+```javascript
+// vite.config.js - Production build optimization
+export default defineConfig({
+  build: {
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
       }
     },
-    {
-      "Name": "AWSManagedRulesCommonRuleSet",
-      "Priority": 2,
-      "Statement": {
-        "ManagedRuleGroupStatement": {
-          "VendorName": "AWS",
-          "Name": "AWSManagedRulesCommonRuleSet"
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          charts: ['recharts'],
+          icons: ['lucide-react'],
+          aws: ['@aws-sdk/client-cognito-identity-provider', '@aws-sdk/client-s3']
         }
-      },
+      }
+    },
+    chunkSizeWarningLimit: 1000
+  },
+  // Enable gzip/brotli compression
+  plugins: [
+    react(),
+    compressionPlugin({
+      algorithm: 'gzip',
+      test: /\.(js|css|html|svg)$/,
+      threshold: 1024
+    })
+  ]
+})
+```
+
+---
+
+## Phần 3: Cost Optimization (Tối ưu chi phí)
+
+### 3.1. S3 Lifecycle Policies
+
+```bash
+cat > lifecycle-policy.json <<'EOF'
+{
+  "Rules": [
+    {
+      "Id": "TransitionImagesToIA",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "faces/raw/" },
+      "Transitions": [
+        { "Days": 30, "StorageClass": "STANDARD_IA" },
+        { "Days": 90, "StorageClass": "GLACIER" },
+        { "Days": 365, "StorageClass": "DEEP_ARCHIVE" }
+      ]
+    },
+    {
+      "Id": "TransitionDataLakeToIA",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "attendance/" },
+      "Transitions": [
+        { "Days": 90, "StorageClass": "STANDARD_IA" },
+        { "Days": 180, "StorageClass": "GLACIER" }
+      ]
+    },
+    {
+      "Id": "TransitionTasksToIA",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "tasks/" },
+      "Transitions": [
+        { "Days": 90, "StorageClass": "STANDARD_IA" },
+        { "Days": 180, "StorageClass": "GLACIER" }
+      ]
+    },
+    {
+      "Id": "DeleteAthenaResults",
+      "Status": "Enabled",
+      "Filter": { "Prefix": "athena-results/" },
+      "Expiration": { "Days": 7 }
+    },
+    {
+      "Id": "DeleteMultipartUploads",
+      "Status": "Enabled",
+      "AbortIncompleteMultipartUpload": { "DaysAfterInitiation": 7 }
+    }
+  ]
+}
+EOF
+
+aws s3api put-bucket-lifecycle-configuration \
+  --bucket smart-campus-images-${AWS_ACCOUNT_ID} \
+  --lifecycle-configuration file://lifecycle-policy.json \
+  --region ap-southeast-1
+
+aws s3api put-bucket-lifecycle-configuration \
+  --bucket smart-campus-datalake-${AWS_ACCOUNT_ID} \
+  --lifecycle-configuration file://lifecycle-policy.json \
+  --region ap-southeast-1
+```
+
+### 3.2. Kinesis Firehose Buffering (Cost vs Latency Trade-off)
+
+```bash
+# Update delivery stream buffering hints
+aws firehose update-destination \
+  --delivery-stream-name smart-campus-attendance-stream \
+  --current-delivery-stream-version-id 1 \
+  --destination-id destinationId \
+  --s3-destination-update '{
+    "BucketARN": "arn:aws:s3:::smart-campus-datalake-xxx",
+    "BufferingHints": {
+      "SizeInMBs": 5,
+      "IntervalInSeconds": 60
+    },
+    "CompressionFormat": "GZIP",
+    "Prefix": "attendance/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/",
+    "ErrorOutputPrefix": "firehose-errors/"
+  }' \
+  --region ap-southeast-1
+```
+
+**Buffering Guidelines:**
+| Workload | Size (MB) | Interval (s) | Latency | Cost |
+|:---|:---|:---|:---|:---|
+| Real-time | 1 | 60 | Low | Higher |
+| **Balanced (Recommended)** | **5** | **60** | **Medium** | **Optimal** |
+| Batch/Analytics | 128 | 300 | High | Lowest |
+
+### 3.3. Athena Cost Optimization
+
+**Partition Pruning (QUAN TRỌNG):**
+```sql
+-- LUÔN filter partition keys trong WHERE clause
+-- GOOD: Partition pruning works
+SELECT * FROM attendance 
+WHERE year = '2026' AND month = '08' AND day = '06'
+
+-- BAD: Full table scan - EXPENSIVE!
+SELECT * FROM attendance 
+WHERE user_id = 'user-001'
+
+-- GOOD: Partition + filter
+SELECT * FROM attendance 
+WHERE year = '2026' AND month = '08' AND user_id = 'user-001'
+```
+
+**Workgroup Configuration:**
+```bash
+aws athena update-work-group \
+  --work-group smart-campus-workgroup \
+  --configuration '{
+    "ResultConfigurationUpdates": {
+      "OutputLocation": "s3://smart-campus-datalake-xxx/athena-results/",
+      "EncryptionConfiguration": { "EncryptionOption": "SSE_S3" }
+    },
+    "EngineVersion": { "SelectedEngineVersion": "Athena engine version 3" },
+    "WorkGroupConfigurationUpdates": {
+      "BytesScannedCutoffPerQuery": 1000000000,  -- 1GB limit per query
+      "EnforceWorkGroupConfiguration": true,
+      "PublishCloudWatchMetricsEnabled": true,
+      "RequesterPaysEnabled": false
+    }
+  }' \
+  --region ap-southeast-1
+```
+
+### 3.4. CloudWatch Logs Retention
+
+```bash
+# Set appropriate retention per log group
+aws logs put-retention-policy --log-group-name /aws/lambda/smart-campus-api --retention-in-days 30 --region ap-southeast-1
+aws logs put-retention-policy --log-group-name /aws/lambda/smart-campus-analytics-worker --retention-in-days 14 --region ap-southeast-1
+aws logs put-retention-policy --log-group-name /aws/lambda/smart-campus-notification-worker --retention-in-days 14 --region ap-southeast-1
+aws logs put-retention-policy --log-group-name /aws/apigateway/smart-campus --retention-in-days 30 --region ap-southeast-1
+aws logs put-retention-policy --log-group-name /aws/events/smart-campus --retention-in-days 30 --region ap-southeast-1
+aws logs put-retention-policy --log-group-name /smart-campus/application --retention-in-days 90 --region ap-southeast-1
+```
+
+### 3.5. Estimated Monthly Cost Breakdown (ap-southeast-1)
+
+| Service | Configuration | Est. Cost/Month |
+|:---|:---|:---|
+| **Lambda** | 1M invocations, 1GB-sec, 100ms avg | ~$3.50 |
+| **API Gateway** | 1M requests, HTTP API | ~$1.00 |
+| **DynamoDB** | On-demand, 10GB storage, 1M reads/writes | ~$15.00 |
+| **S3** | 50GB Standard + 100GB IA + 10GB Glacier | ~$3.50 |
+| **Rekognition** | 10K face searches + 1K liveness | ~$12.00 |
+| **EventBridge** | 100K events | ~$1.00 |
+| **SQS** | 100K messages | ~$0.40 |
+| **SNS** | 10K notifications | ~$0.50 |
+| **Athena** | 100GB scanned/month | ~$5.00 |
+| **Glue** | 3 crawlers, 10 DPU-hours | ~$2.00 |
+| **CloudWatch** | Logs 10GB, 10 alarms, 1 dashboard | ~$5.00 |
+| **X-Ray** | 100K traces | ~$5.00 |
+| **CloudFront** | 1TB transfer, 10M requests | ~$10.00 |
+| **WAF** | 1 Web ACL, 1M requests | ~$5.00 |
+| **Cognito** | 1000 MAU | ~$0 (Free tier) |
+| **CodeBuild** | 100 build minutes | ~$1.50 |
+| **Kinesis Firehose** | 10GB ingested | ~$0.30 |
+| **TOTAL** | **Production workload** | **~$70-80/month** |
+
+---
+
+## Phần 4: Reliability & Disaster Recovery
+
+### 4.1. Multi-AZ (Automatic cho Serverless)
+- Lambda: Automatic Multi-AZ
+- DynamoDB: Automatic Multi-AZ replication
+- S3: Automatic Multi-AZ (99.999999999% durability)
+- SQS/SNS: Automatic Multi-AZ
+
+### 4.2. Backup Strategy
+
+**DynamoDB Point-in-Time Recovery (PITR):**
+```bash
+aws dynamodb update-continuous-backups \
+  --table-name smart-campus-users \
+  --point-in-time-recovery-specification PointInTimeRecoveryEnabled=true \
+  --region ap-southeast-1
+
+# Repeat for all 8 tables
+```
+
+**S3 Cross-Region Replication (CRR):**
+```bash
+# Replicate critical buckets to backup region (ap-northeast-1)
+# Requires versioning enabled on both source and destination
+```
+
+### 4.3. DLQ Monitoring & Recovery
+
+```bash
+# CloudWatch Alarm cho DLQ (already created in 5.10)
+# Recovery procedure:
+# 1. Check DLQ messages
+aws sqs receive-message --queue-url https://sqs.ap-southeast-1.amazonaws.com/xxx/smart-campus-analytics-dlq --max-number-of-messages 10
+
+# 2. Analyze failure reason (check message attributes)
+# 3. Fix root cause (code bug, permission, throttling)
+# 4. Re-drive messages
+aws sqs start-message-move-task \
+  --source-arn arn:aws:sqs:ap-southeast-1:xxx:smart-campus-analytics-dlq \
+  --destination-arn arn:aws:sqs:ap-southeast-1:xxx:smart-campus-analytics-queue \
+  --region ap-southeast-1
+```
+
+### 4.4. Chaos Engineering (Game Days)
+
+```bash
+# Simulate failures để test resilience:
+# 1. Lambda throttle: aws lambda put-function-concurrency --function-name smart-campus-api --reserved-concurrent-executions 1
+# 2. DynamoDB throttle: Reduce RCU/WCU temporarily
+# 3. Network failure: VPC endpoint deletion
+# 4. Dependency failure: Mock Rekognition 500 errors
+
+# Verify: System degrades gracefully, DLQ catches messages, alarms fire, auto-recovery works
+```
+
+---
+
+## Checklist Security & Optimization Summary
+
+| Category | Item | Status |
+|:---|:---|:---|
+| **IAM** | Least privilege policies per Lambda | ☐ |
+| **IAM** | No wildcard (*) resources where avoidable | ☐ |
+| **WAF** | IP Whitelist for attendance endpoints | ☐ |
+| **WAF** | Rate limiting + AWS Managed Rules | ☐ |
+| **Encryption** | S3 SSE-S3 (AES256) | ☐ |
+| **Encryption** | DynamoDB Encryption at rest | ☐ |
+| **Encryption** | Athena results encrypted | ☐ |
+| **Cognito** | MFA enabled | ☐ |
+| **Cognito** | Strong password policy | ☐ |
+| **Cognito** | Advanced security (risk-based) | ☐ |
+| **Lambda** | Memory optimized (power tuning) | ☐ |
+| **Lambda** | Provisioned concurrency (prod) | ☐ |
+| **API GW** | Caching enabled for GET | ☐ |
+| **DynamoDB** | Auto Scaling configured | ☐ |
+| **DynamoDB** | PITR enabled | ☐ |
+| **S3** | Lifecycle policies (IA/Glacier) | ☐ |
+| **S3** | CRR for critical data | ☐ |
+| **Firehose** | Buffering optimized (5MB/60s) | ☐ |
+| **Athena** | Partition pruning enforced | ☐ |
+| **Athena** | Workgroup query limits | ☐ |
+| **CloudWatch** | Log retention configured | ☐ |
+| **CloudWatch** | Alarms for DLQ, Errors, Throttles | ☐ |
+| **X-Ray** | Tracing enabled + service map | ☐ |
+| **Cost** | Monthly budget alarm ($100) | ☐ |
+| **DR** | DLQ re-drive procedure documented | ☐ |
+| **DR** | Game day exercises scheduled | ☐ |
+
+---
+
+## Next Step
+
+Tiến hành [Bước 12: Cleanup Resources](../5.12-cleanup) để dọn dẹp tài nguyên sau workshop!
       "OverrideAction": {
         "None": {}
       },
