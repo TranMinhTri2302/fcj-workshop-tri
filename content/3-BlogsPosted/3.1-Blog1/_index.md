@@ -90,3 +90,6 @@ https://www.facebook.com/share/p/1BxRgPHRBn/
 
 **Main Reference:**  
 [Paginating table query results — Amazon DynamoDB Developer Guide](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Query.Pagination.html)
+
+**Blog Image:**  
+![Blog 1](images/3-Blog/Blog-1.png)

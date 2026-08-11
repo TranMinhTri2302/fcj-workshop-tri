@@ -336,7 +336,11 @@ Phần khiến mình bất ngờ nhất là **Evaluation**. Trước đây mình
 
 Phần **Hands-on Lab** thì đúng là "làm mới hiểu". Có những chi tiết như việc tách Log để local còn Trace đẩy lên cloud — nghe thì rất hiển nhiên, nhưng nếu không thực sự chạy và nhìn thấy output ở hai nơi khác nhau thì mình sẽ không bao giờ để tâm. Khoảnh khắc thấy được quá trình **Thinking và Reasoning hiện ra trên terminal đen** cũng là một trải nghiệm khá đặc biệt — nó biến thứ trừu tượng thành thứ nhìn được.
 
-Cuối cùng, phần **định hướng nghề nghiệp** ở đầu session tuy ngắn nhưng lại là phần mình suy nghĩ nhiều nhất sau khi xem xong. Nó khiến mình phải nhìn lại cách mình đang đầu tư thời gian: mình đang học rộng hay học sâu? Mình có đang tích lũy domain knowledge nào không, hay chỉ đang gom chứng chỉ?
+Phần **định hướng nghề nghiệp** ở đầu session tuy ngắn nhưng lại là phần mình suy nghĩ nhiều nhất sau khi xem xong. Nó khiến mình phải nhìn lại cách mình đang đầu tư thời gian: mình đang học rộng hay học sâu? Mình có đang tích lũy domain knowledge nào không, hay chỉ đang gom chứng chỉ?
+
+Sau ngày 2 của Event vừa làm Project nhóm và làm phần thực hành của Event, em nhận thấy 50 token của Kiro hết khá nhanh, không build tiếp với các anh được.
+
+Các anh chịu trách nhiệm tổ chức sự kiện rất quan tâm và hiểu rằng nhiều bạn tham dự Deepdive day 2 không đi được day 1 nên phần thực hành vẫn chỉ các bạn chạy lại môi trường, set up Kiro và prompt như day 1. Và các anh cũng khá thoải mái và chủ động tạo bầu không khi vui vẻ cho sự kiện, có anh còn muốn thắng giải chụp hình Canon và đãi mọi người ăn Haidilao nếu thắng.
 
 ---
 
@@ -347,7 +351,7 @@ Cuối cùng, phần **định hướng nghề nghiệp** ở đầu session tuy
 - **Không đo được thì không cải thiện được.** Không có Ground Truth thì mọi việc tinh chỉnh prompt đều chỉ là cảm tính.
 - **Con người vẫn không thể thay thế trong khâu đánh giá.** SME là mắt xích bắt buộc, đặc biệt trong các lĩnh vực có tính nghiệp vụ cao.
 - **Permissive là để dev, Strict là để sống.** Quên siết quyền trước khi lên production là một trong những lỗi tốn kém nhất có thể mắc phải.
-- **Memory Strategy là bài toán tiền bạc, không chỉ là bài toán kỹ thuật.** Mỗi token ghi nhớ đều có giá.
+- **Memory Strategy là bài toán tiền bạc, không chỉ là bài toán kỹ thuật.** Mỗi token ghi nhớ đều có giá, 50 token của Kiro hết nhanh khi không xài tối ưu.
 - **Serverless là bạn của giai đoạn thử nghiệm** — không traffic thì không tốn tiền, cho phép thử sai thoải mái.
 - **Sự nghiệp cũng cần kiến trúc như hệ thống:** đào sâu trước, mở rộng sau, và đừng quên chiều nghiệp vụ lẫn kỹ năng giao tiếp.
 
@@ -360,5 +364,6 @@ Cuối cùng, phần **định hướng nghề nghiệp** ở đầu session tuy
 ![Event 3-3](/images/4-EventParticipated/EV3-3.png)
 ![Event 3-4](/images/4-EventParticipated/EV3-4.png)
 ![Event 3-5](/images/4-EventParticipated/EV3-5.png)
+![Event 3-6](/images/4-EventParticipated/EV3-6.png)
 
 > Nhìn chung, session này bổ sung đúng mảnh ghép còn thiếu sau buổi Deepdive trước: nếu buổi trước cho mình biết **Agent được xây bằng gì**, thì buổi này cho mình biết **làm sao để nó sống được ngoài thực tế**. Memory quyết định Agent thông minh tới đâu, Observability quyết định mình có kiểm soát được nó không, Evaluation quyết định mình có biết nó tốt hay dở không, và Security quyết định nó có gây họa hay không. Thiếu bất kỳ mảnh nào trong bốn mảnh đó, Agent vẫn chỉ là một bản demo đẹp mắt chứ chưa phải một sản phẩm.

@@ -337,7 +337,11 @@ Most impressive is **session structure**: starts with career guidance (soft topi
 
 The **Hands-on Lab** truly drives understanding home. Small details like separating local Logs from cloud Traces seem obvious until you actually run and see outputs in two different places. The moment reasoning appeared on the black terminal screen was special — transforming abstract concepts into observable reality.
 
-Finally, the **career guidance section**, though brief, prompted the most post-session reflection. It made me examine how I'm spending time: am I learning broad or deep? Am I accumulating domain knowledge or just collecting certificates?
+Although the career guidance segment at the beginning of the session was brief, it left me with the most food for thought afterward. It forced me to re-evaluate how I’m investing my time: am I learning broadly, or am I diving deep? Am I genuinely building domain knowledge, or just hoarding certificates?
+
+After Day 2 of the event, which involved both the group project and the hands-on practice, I realized that Kiro's 50-token allowance ran out pretty quickly, meaning I couldn't continue building alongside the team.
+
+The organizing team was incredibly thoughtful. Understanding that many attendees at the Day 2 Deepdive had missed Day 1, they made sure the hands-on session walked us through setting up the environment, configuring Kiro, and prompting exactly as they had done on the first day. They were also very easygoing and proactive in creating a fun, welcoming vibe. One of the organizers even joked about wanting to win the Canon photography contest so he could treat everyone to Haidilao.
 
 ---
 
@@ -348,7 +352,7 @@ Finally, the **career guidance section**, though brief, prompted the most post-s
 - **You cannot improve what you don't measure.** Without Ground Truth, prompt refinement is just subjective guessing.
 - **Humans remain irreplaceable in evaluation.** SMEs are mandatory gates, especially in high-domain-complexity fields.
 - **Permissive is for development, Strict is for living.** Forgetting to tighten permissions before production is among the costliest mistakes.
-- **Memory Strategy is a financial question, not just technical.** Every remembered token has a price.
+- **Memory Strategy is a financial question, not just technical.** Every stored token costs money; Kiro’s 50 tokens disappeared fast when not used optimally.
 - **Serverless is a friend to experimentation** — no traffic means no cost; enables comfortable trial and error.
 - **Careers need architecture like systems:** deepen first, broaden after, never forget domain knowledge and communication.
 
@@ -361,5 +365,6 @@ Finally, the **career guidance section**, though brief, prompted the most post-s
 ![Event 3-3](/images/4-EventParticipated/EV3-3.png)
 ![Event 3-4](/images/4-EventParticipated/EV3-4.png)
 ![Event 3-5](/images/4-EventParticipated/EV3-5.png)
+![Event 3-6](/images/4-EventParticipated/EV3-6.png)
 
 > Overall, this session filled the missing puzzle piece from the previous Deepdive: if that session explained **what Agents are made of**, this one showed **how to make them survive in the real world**. Memory determines how intelligent Agents become; Observability determines whether you maintain control; Evaluation determines if you know quality or just assume it; Security determines whether Agents cause harm. Missing any single piece, and Agents remain impressive demos rather than actual products.
