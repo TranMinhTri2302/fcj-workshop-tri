@@ -1,46 +1,48 @@
 ---
 title: "Worklog Tuần 1"
-date: 2024-01-01
+date: 2026-06-22
 weight: 1
 chapter: false
 pre: " <b> 1.1. </b> "
 ---
 
+# Tuần 1: Hội nhập môi trường – Nền tảng Cloud Computing – Thực hành dịch vụ AWS cốt lõi
 
+## 1. Mục tiêu tuần
 
-### Mục tiêu tuần 1:
+* Làm quen với môi trường làm việc tại văn phòng Bitexco, kết nối với các thành viên trong chương trình và bước đầu hình thành nhóm thực hiện dự án.
+* Nắm các khái niệm nền tảng của Cloud Computing như Data Center, Region, Availability Zone, mô hình trách nhiệm chung và vai trò của hạ tầng cloud trong doanh nghiệp.
+* Thiết lập tài khoản AWS cá nhân với các cấu hình bảo mật cơ bản, đồng thời thực hành các dịch vụ cốt lõi ban đầu gồm EC2, S3 và AWS CLI.
+* Bắt đầu nghiên cứu kiến trúc mạng trên AWS (VPC) và đọc kỹ yêu cầu đồ án thực tập để chuẩn bị cho giai đoạn phân tích hệ thống.
 
-* Làm quen với môi trường làm việc tại văn phòng Bitexco, kết nối với các thành viên trong chương trình và hình thành nhóm thực hiện dự án.
-* Nắm được tổng quan về chương trình AWS, các khái niệm nền tảng của Cloud Computing và cấu trúc hạ tầng toàn cầu của AWS.
-* Thực hành các dịch vụ cốt lõi cơ bản như EC2, S3 và AWS CLI, đồng thời bắt đầu tìm hiểu về VPC và tham gia sự kiện FCAJ Community Day.
+## 2. Nhật ký công việc chi tiết
 
-### Các công việc cần triển khai trong tuần này:
 | Thứ | Công việc | Ngày bắt đầu | Ngày hoàn thành | Nguồn tài liệu |
 | --- | --- | --- | --- | --- |
-| 2 | - Làm quen môi trường làm việc tại văn phòng Bitexco <br> - Kết nối với các thành viên trong chương trình và hình thành nhóm thực hiện dự án <br> - Tìm hiểu các nội quy, quy định và cách làm việc tại đơn vị thực tập | 22/06/2026 | 22/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
-| 3 | - Tìm hiểu tổng quan về chương trình AWS (mô hình học, chi phí lab, yêu cầu nền tảng lập trình) <br> - Nắm các khái niệm cơ bản về Cloud Computing: Data Center, Region, Availability Zone và vai trò của hạ tầng cloud trong doanh nghiệp | 23/06/2026 | 23/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
-| 4 | - Tự tạo tài khoản AWS cá nhân, thiết lập bảo mật (MFA, tránh sử dụng Root User cho thao tác hàng ngày) <br> - Làm quen với AWS Management Console <br> - Tìm hiểu cơ bản về AWS CLI (cài đặt, cấu hình, sử dụng các lệnh cơ bản) | 24/06/2026 | 24/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
-| 5 | - **Thực hành lab cơ bản:** <br>&emsp; + Tạo EC2 instance và kết nối qua SSH <br>&emsp; + Tạo S3 bucket và quản lý dữ liệu | 25/06/2026 | 25/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
-| 6 | - Bắt đầu nghiên cứu VPC và các thành phần mạng quan trọng như Subnet, Route Table, Internet Gateway và Security Group <br> - Thảo luận và định hướng đề tài nhóm giữa các lựa chọn Smart Campus và Ticket System | 26/06/2026 | 26/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
-| 7 | - Tham gia sự kiện **FCAJ Community Day (27/06/2026)** <br> - Tiếp cận thực tế về Cloud, AI, DevOps, Security và các mô hình kiến trúc AWS được ứng dụng trong doanh nghiệp | 27/06/2026 | 27/06/2026 | <https://cloudjourney.awsstudygroup.com/> <br> [Video sự kiện FCAJ Community Day](https://www.youtube.com/watch?v=G8-WlI7f6dE) |
+| 2 | - Làm quen môi trường làm việc tại văn phòng Bitexco, kết nối với các thành viên trong chương trình <br> - Tìm hiểu nội quy, quy định và cách vận hành chung của đợt thực tập <br> - Bước đầu hình thành nhóm dự án, trao đổi về năng lực và định hướng kỹ thuật của từng thành viên | 22/06/2026 | 22/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 3 | - Tìm hiểu tổng quan về chương trình AWS: mô hình học tập theo workshop/lab, chi phí sử dụng lab và credit, yêu cầu nền tảng lập trình và định hướng đánh giá <br> - Nghiên cứu các khái niệm cốt lõi của Cloud Computing: Data Center, Region, Availability Zone <br> - Tìm hiểu vai trò của hạ tầng cloud trong doanh nghiệp và lý do doanh nghiệp chọn cloud thay cho on-premise ở một số bài toán | 23/06/2026 | 23/06/2026 | <https://cloudjourney.awsstudygroup.com/> <br> <https://docs.aws.amazon.com/whitepapers/latest/aws-overview/> |
+| 4 | - Tự tạo tài khoản AWS cá nhân (Free Tier), kích hoạt MFA, thiết lập nguyên tắc không sử dụng Root User cho thao tác hằng ngày <br> - Làm quen với AWS Management Console: điều hướng giữa các dịch vụ, kiểm tra region, theo dõi billing dashboard <br> - Cài đặt và cấu hình AWS CLI: thiết lập access key, kiểm tra kết nối, chạy các lệnh cơ bản | 24/06/2026 | 24/06/2026 | <https://docs.aws.amazon.com/cli/latest/userguide/> <br> <https://docs.aws.amazon.com/IAM/latest/UserGuide/> |
+| 5 | - **Thực hành lab cơ bản:** <br>&emsp; + Tạo EC2 instance, cấu hình Security Group tối thiểu và kết nối SSH <br>&emsp; + Tạo S3 bucket, upload file, quản lý dữ liệu và kiểm tra quyền truy cập <br> - Ghi chú lại quy trình thao tác tài nguyên cloud trên Console và CLI để dùng cho các tuần sau | 25/06/2026 | 25/06/2026 | <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/> <br> <https://docs.aws.amazon.com/AmazonS3/latest/userguide/> |
+| 6 | - Nghiên cứu VPC và các thành phần mạng: Subnet, Route Table, Internet Gateway, Security Group <br> - Tìm hiểu mối liên hệ giữa public/private subnet trong thiết kế hệ thống <br> - Đọc kỹ yêu cầu đồ án AWS, ghi nhận các tiêu chí đánh giá và các hạng mục bắt buộc phải thể hiện trong báo cáo/workshop <br> - Thảo luận nội bộ nhóm về định hướng đề tài, so sánh sơ bộ giữa Smart Campus và Ticket System | 26/06/2026 | 26/06/2026 | <https://docs.aws.amazon.com/vpc/latest/userguide/> |
 
-### Kết quả đạt được tuần 1:
+## 3. Đóng góp cá nhân
 
-* **Hội nhập và khởi tạo dự án:**
-  * Làm quen với môi trường làm việc tại văn phòng Bitexco, kết nối với các thành viên trong chương trình và hình thành nhóm thực hiện dự án.
-  * Tìm hiểu tổng quan về chương trình AWS, cơ chế học tập, chi phí lab và yêu cầu nền tảng kỹ thuật ban đầu.
+* Chủ động thiết lập tài khoản AWS cá nhân, cấu hình bảo mật và chuẩn bị môi trường thực hành riêng ngay từ đầu.
+* Tự thực hiện các lab nền tảng với EC2, S3 và CLI để có trải nghiệm thực tế thay vì chỉ dừng ở mức đọc tài liệu.
+* Tập hợp ghi chú kỹ thuật cơ bản về IAM, Region, Availability Zone, VPC và CLI để làm nền cho giai đoạn thiết kế sau đó.
+* Trao đổi với các thành viên về năng lực kỹ thuật và định hướng công nghệ, hỗ trợ việc hình thành nhóm và chọn đề tài.
+* Đọc sớm yêu cầu đồ án và ghi lại những đầu mục quan trọng liên quan đến báo cáo, workshop và phần triển khai kỹ thuật.
+
+## 4. Kết quả đạt được
 
 * **Nền tảng Cloud Computing và bảo mật:**
-  * Nắm được các khái niệm cốt lõi về Cloud Computing như Data Center, Region, Availability Zone và vai trò của hạ tầng cloud trong doanh nghiệp.
-  * Tự tạo tài khoản AWS cá nhân, thiết lập các biện pháp bảo mật cơ bản như MFA và tránh sử dụng Root User cho các thao tác hàng ngày.
+  * Nắm được các khái niệm cơ bản về Cloud Computing, kiến trúc hạ tầng AWS và mô hình trách nhiệm chung.
+  * Hoàn tất thiết lập AWS Free Tier account, MFA và AWS CLI.
 
-* **Thực hành dịch vụ AWS và kiến trúc mạng:**
-  * Thực hiện các lab cơ bản như tạo EC2 instance, kết nối SSH, tạo S3 bucket và quản lý dữ liệu.
-  * Làm quen với AWS CLI và bắt đầu nghiên cứu về VPC cùng các thành phần mạng cốt lõi như Subnet, Route Table, Internet Gateway và Security Group.
+* **Thực hành dịch vụ AWS:**
+  * Thực hiện thành công các lab nền tảng: tạo EC2 instance, kết nối SSH, tạo S3 bucket và quản lý dữ liệu.
+  * Tạo được REST endpoint serverless đầu tiên, đồng thời làm quen với luồng thao tác tài nguyên cloud an toàn.
 
-* **Sự kiện và định hướng đề tài:**
-  * Tham gia FCAJ Community Day, tiếp cận trực tiếp các xu hướng Cloud, AI, DevOps, Security và kiến trúc AWS trong thực tế.
-  * Chuẩn bị nền tảng cho việc lựa chọn đề tài nhóm, với Smart Campus và Ticket System là hai hướng được ưu tiên xem xét.
-
-
-
+* **Chuẩn bị cho đồ án:**
+  * Có nền tảng ban đầu về VPC và các thành phần mạng cốt lõi.
+  * Hoàn tất bước chuẩn bị để chuyển sang giai đoạn phân tích bài toán và thiết kế hệ thống ở tuần tiếp theo.

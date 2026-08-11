@@ -1,100 +1,33 @@
 ---
-title: "Đề xuất dự án"
-date: 2024-01-01
+title: "2. Bản đề xuất (Proposal)"
 weight: 2
 chapter: false
-pre: " <b> 2. </b> "
 ---
 
-# Smart Campus Platform — Hệ thống điểm danh thông minh Serverless
+# Bản đề xuất (Project Proposal)
 
-## Xây dựng hệ thống điểm danh bằng nhận diện khuôn mặt với kiến trúc Event-Driven trên AWS
+## 1. Tổng quan dự án (Project Overview)
+**Smart Campus Platform** là một hệ thống phần mềm toàn diện nhằm hiện đại hóa và số hóa quy trình quản lý công việc và điểm danh. Dự án bao gồm tự động hóa điểm danh bằng khuôn mặt, quản lý công việc, điểm danh và thống kê công việc, điểm danh của nhân viên.
 
-### 1. Tóm tắt dự án
+Đặc biệt, hệ thống được thiết kế **100% Serverless trên nền tảng AWS**, áp dụng kiến trúc Event-Driven Microservices để đảm bảo tính mở rộng cao, chi phí thấp và khả năng vận hành bền bỉ.
 
-Smart Campus Platform là hệ thống quản lý điểm danh thông minh cho trường học và doanh nghiệp, được xây dựng hoàn toàn trên kiến trúc serverless AWS. Hệ thống tự động hóa quy trình điểm danh bằng công nghệ nhận diện khuôn mặt AI, kết hợp với quản lý công việc, nghỉ phép và phân tích dữ liệu.
-
-Trong nhiều môi trường làm việc thực tế, điểm danh vẫn được thực hiện thủ công hoặc bằng thẻ từ. Một người có thể nhờ đồng nghiệp quẹt thẻ hộ, sử dụng thẻ của người khác, hoặc dùng ảnh in để qua mặt hệ thống camera đơn giản. Việc tổng hợp báo cáo chuyên cần cũng tốn nhiều thời gian xử lý thủ công.
-
-Smart Campus giải quyết vấn đề này bằng cách chuyển quy trình điểm danh rời rạc thành một workflow có cấu trúc và tự động. Hệ thống sử dụng **Amazon Rekognition Face Recognition** kết hợp với **Face Liveness Detection** để nhận diện khuôn mặt và ngăn chặn gian lận bằng ảnh in, video replay hoặc mặt nạ 3D. Mỗi lần điểm danh được ghi nhận với thông tin: user_id, timestamp, session_type (MORNING/AFTERNOON/EVENING), status (PRESENT/LATE/ABSENT/REJECTED), confidence score và camera_id. Hệ thống tự động phát hiện các vi phạm như điểm danh muộn, trùng lặp hoặc ngoài giờ.
-
-Về mặt AWS và Cloud Architecture, dự án tập trung vào việc xây dựng, triển khai và vận hành một ứng dụng serverless production-grade. Backend được xây dựng bằng Python FastAPI, chạy trên **AWS Lambda** thông qua **Mangum adapter**, expose API qua **Amazon API Gateway**, lưu trữ dữ liệu trên **Amazon DynamoDB**, xử lý sự kiện qua **Amazon EventBridge** và **Amazon SQS**, phân tích dữ liệu với **Amazon Athena** và **AWS Glue**, giám sát bằng **Amazon CloudWatch** và tích hợp AI với **Amazon Bedrock (Claude 3)**.
-
-Đặc biệt, hệ thống được thiết kế **100% Serverless trên nền tảng AWS**, áp dụng kiến trúc Event-Driven Microservices để đảm bảo tính mở rộng cao, chi phí thấp và khả năng vận hành bền bỉ. Mục đích của dự án không chỉ là xây dựng một ứng dụng web, mà còn là thể hiện một quy trình triển khai cloud hoàn chỉnh trên AWS theo best practices.
-
----
-
-### 2. Phát biểu bài toán
-
-#### Vấn đề hiện tại là gì?
-
-Trong các tổ chức nhỏ và vừa, trường học hoặc môi trường văn phòng, điểm danh thường được thực hiện thủ công hoặc không chính thức. Ví dụ, sinh viên có thể nhờ bạn điểm danh hộ, nhân viên có thể sử dụng thẻ của đồng nghiệp để check-in, hoặc sử dụng ảnh in để qua mặt hệ thống camera đơn giản. Những cách làm này khó kiểm soát và dễ gian lận.
-
-Các vấn đề chính bao gồm:
-
-* Gian lận điểm danh dễ dàng bằng cách nhờ người khác, dùng ảnh hoặc dùng thẻ.
-* Tốn thời gian điểm danh thủ công, khoảng 5 đến 10 phút mỗi buổi cho 50 người.
-* Khó theo dõi và tổng hợp dữ liệu chuyên cần.
-* Không có cảnh báo realtime khi có vi phạm.
-* Báo cáo tổng hợp phải xử lý thủ công, mất nhiều giờ.
-* Quản lý công việc và nghỉ phép rời rạc, không tập trung.
-* Triển khai thủ công gây ra phiên bản không nhất quán.
-* Không có monitoring, chỉ phát hiện lỗi khi người dùng phản ánh.
-
-#### Giải pháp đề xuất
-
-Smart Campus cung cấp quy trình điểm danh có cấu trúc và tự động hoàn toàn. Người dùng chỉ cần đứng trước camera 2 đến 3 giây, hệ thống tự động thực hiện:
-
-1. **Face Liveness Detection**: Kiểm tra xem có phải người thật không, phát hiện ảnh in, video replay và mặt nạ 3D.
-2. **Face Recognition**: Nhận diện khuôn mặt và match với database.
-3. **Rule Engine**: Áp dụng các quy tắc nghiệp vụ như kiểm tra trùng lặp, kiểm tra session và kiểm tra thời gian.
-4. **Auto Record**: Tự động ghi nhận điểm danh vào DynamoDB.
-5. **Event Publishing**: Publish event để trigger các downstream services như notification, analytics và security.
-
-Quy trình điểm danh:
-
-```text
-Camera → Liveness Check (80%+) → Face Recognition (80%+) → Rule Engine → Record → Events
-```
-
-Trạng thái điểm danh:
-
-```text
-PRESENT: Đúng giờ, trong 15 phút đầu session
-LATE: Muộn, sau 15 phút nhưng trong session
-ABSENT: Vắng mặt, không điểm danh
-REJECTED: Bị từ chối, ngoài session hoặc trùng lặp
-```
-
-Sessions:
-
-```text
-MORNING: 07:00 - 11:30
-AFTERNOON: 13:00 - 17:30
-EVENING: 18:00 - 21:00
-```
-
-
-#### Lợi ích của dự án
-
-Smart Campus mang lại hai lợi ích chính.
-
-Thứ nhất, hệ thống cải thiện quy trình điểm danh. Mỗi lần điểm danh trở thành một record có thể trace với timestamp, status và confidence score. Điều này giúp ngăn chặn gian lận và làm quy trình minh bạch hơn. Thời gian điểm danh giảm từ 5 đến 10 phút xuống còn 2 đến 3 giây mỗi người.
-
-Thứ hai, dự án là một bài thực hành cloud và DevOps thực tế. Dự án bao gồm serverless architecture, event-driven patterns, AI/ML integration, data lake analytics, monitoring, security và cost optimization. Đây là những kỹ năng quan trọng khi triển khai và vận hành ứng dụng trên AWS.
-
----
+## 2. Vấn đề cần giải quyết (Problem Statement)
+Hệ thống giải quyết các bài toán nhức nhối trong quản lý truyền thống:
+- **Điểm danh thủ công & gian lận:** Việc sử dụng thẻ từ hay vân tay dễ bị lách luật, quên thẻ, hoặc chậm trễ vào giờ cao điểm.
+- **Dữ liệu phân mảnh:** Dữ liệu nhân sự, công việc và điểm danh nằm rải rác, gây khó khăn cho Giám đốc/Quản lý khi muốn xem báo cáo toàn cảnh.
+- **Chi phí vận hành Server cao:** Các hệ thống nội bộ thường không có người dùng 24/7 (buổi tối và cuối tuần thường trống) nhưng doanh nghiệp vẫn phải trả tiền duy trì máy chủ vật lý.
+- **Thiếu cảnh báo chủ động:** Quản lý không được thông báo kịp thời khi nhân viên đi trễ, nghỉ phép hay công việc bị quá hạn.
 
 ## 3. Mục tiêu (Objectives)
 - **Tự động hóa & Chính xác:** Ứng dụng AI nhận diện khuôn mặt kết hợp hàng rào IP (IP Whitelisting) để điểm danh nhanh chóng, chính xác tuyệt đối và chống gian lận.
 - **Tập trung hóa dữ liệu (Data Lake):** Xây dựng một đường ống dữ liệu (Analytics Pipeline) thu thập hàng ngàn luồng sự kiện để phục vụ phân tích báo cáo thời gian thực.
 - **Tối ưu chi phí 100%:** Ứng dụng triệt để kiến trúc Serverless (trả tiền theo mỗi lần gọi API), đảm bảo chi phí bằng 0 khi không có người sử dụng.
-- **Bảo mật theo tiêu chuẩn đám mây:** Phân quyền chặt chẽ (RBAC) và bảo vệ dữ liệu nhạy cảm bằng hệ thống Firewall và Token.
+- **Bảo mật theo tiêu chuẩn đám mây:** Phân quyền chặt chẽ (RBAC) và bảo vệ dữ liệu nhạy cảm bằng hệ thống Firewall.
 
 ## 4. Các luồng nghiệp vụ và Kiến trúc giải pháp (Workflows & Solution Architecture)
 
 > **[SƠ ĐỒ KIẾN TRÚC TỔNG THỂ]**
-> <!-- TODO: Khi vẽ xong sơ đồ kiến trúc, hãy chèn ảnh vào đây bằng cú pháp: ![Sơ đồ kiến trúc](/images/architecture.png) -->
+> ![Sơ đồ kiến trúc](/aws-image/AwsArchitecture.drawio.png)
 
 Hệ thống được thiết kế dựa trên kiến trúc **Event-Driven Microservices** và ứng dụng hơn 15 dịch vụ đám mây của AWS. Dưới đây là chi tiết 6 luồng nghiệp vụ cốt lõi và cách các dịch vụ AWS phối hợp giải quyết bài toán:
 
@@ -150,7 +83,7 @@ Dưới đây là bảng tổng hợp các dịch vụ AWS được ứng dụng
 | 8 | **Amazon EventBridge** | Event Bus định tuyến các sự kiện (ví dụ: `AttendanceRecorded`) và chạy Cronjob. | Tách rời các module (Decoupling) theo chuẩn Event-Driven, dễ dàng thêm nghiệp vụ mới. |
 | 9 | **Amazon SQS** | Hàng đợi tin nhắn (Queue) đứng trước các Worker. | Đảm bảo không mất dữ liệu khi có lỗi xảy ra. Tích hợp Dead Letter Queue (DLQ) để retry. |
 | 10 | **Amazon Rekognition** | So khớp khuôn mặt nhân viên qua camera khi check-in. | AI có sẵn siêu mạnh, không tốn thời gian train model. Độ chính xác cao (Confidence > 95%). |
-| 11 | **Amazon Kinesis Data Firehose, Glue & Athena** | Bộ ba pipeline gom log điểm danh trên S3, phân tích và truy vấn bằng SQL. | Batching file tự động để tiết kiệm phí S3/Athena. Tách bạch hệ thống OLTP và OLAP. |
+| 11 | **Glue & Athena** | Bộ đôi Glue & Athena pipeline gom log điểm danh trên S3, phân tích và truy vấn bằng SQL. | Batching file tự động để tiết kiệm phí S3/Athena. Tách bạch hệ thống OLTP và OLAP. |
 | 12 | **AWS CodeBuild & CodePipeline** | Thiết lập CI/CD Pipeline tự động build Frontend và đóng gói Lambda Backend. | Triển khai liên tục (Continuous Deployment) một cách hoàn toàn tự động từ source code. Đảm bảo an toàn và nhất quán giữa các lần release. |
 
 ### 4.8. Đánh giá Kiến trúc theo 5 Trụ cột AWS Well-Architected Framework
@@ -165,11 +98,10 @@ Toàn bộ kiến trúc của Smart Campus Platform được thiết kế tuân 
 ## 5. Timeline dự kiến
 | Tuần | Hạng mục công việc |
 | :--- | :--- |
-| **Tuần 1-2** | Phân tích yêu cầu, thiết kế kiến trúc hệ thống, vẽ sơ đồ UML và Architecture. Thiết lập tài nguyên mạng AWS, CloudFront, WAF, S3 tĩnh. |
+| **Tuần 1-2** | Phân tích yêu cầu, thiết kế kiến trúc hệ thống. Thiết lập mạng AWS, CloudFront, WAF, S3 tĩnh. Xây dựng Frontend ReactJS cơ bản. |
 | **Tuần 3-4** | Xây dựng Backend API (FastAPI) trên AWS Lambda và DynamoDB. Tích hợp Cognito và Rekognition cho tính năng điểm danh bằng khuôn mặt. |
-| **Tuần 5** | Thiết kế Event-Driven Architecture với EventBridge và SQS. Hoàn thiện luồng Gửi thông báo (SNS/SES). |
-| **Tuần 6-7**| Xây dựng Data Lake Pipeline (Firehose -> S3 -> Glue -> Athena) phục vụ Báo cáo Analytics. Xây dựng Frontend ReactJS kết nối API. |
-| **Tuần 8**| Tích hợp CI/CD (CodeBuild, CodePipeline), Automation Testing, tối ưu hiệu năng (X-Ray), tổng kết và viết báo cáo. |
+| **Tuần 5-6** | Thiết kế Event-Driven Architecture với EventBridge và SQS. Xây dựng Data Lake Pipeline phục vụ Báo cáo Analytics. |
+| **Tuần 7-8** | Tích hợp CI/CD (CodeBuild, CodePipeline), Automation Testing, hoàn thiện luồng Gửi thông báo (SNS/SES), tổng kết và viết báo cáo. |
 
 ## 6. Ước Tính Ngân Sách Hàng Tháng (Monthly Budget Estimation)
 Dự toán ngân sách được tính dựa trên quy mô vận hành thực tế tại 1 khuôn viên vừa: **200 nhân viên, mỗi người điểm danh trung bình từ 1 đến 4 lượt/ngày** (sáng đến, trưa đi ăn, chiều quay lại, tối về). Tổng cộng hệ thống sẽ xử lý khoảng **20.000 lượt điểm danh/tháng** và khoảng **150.000 API requests/tháng** (bao gồm cả giao việc, báo cáo, nghỉ phép).
@@ -222,47 +154,3 @@ Sau khi hoàn thành triển khai, hệ thống **Smart Campus** dự kiến đ�
 - **Tối ưu chi phí:** Tiết kiệm hơn **80%** chi phí vận hành hạ tầng so với việc thuê máy chủ truyền thống (EC2/VPS), nhờ mô hình không dùng máy chủ (Pay-as-you-go).
 - **Khả năng bảo trì cao:** Toàn bộ kiến trúc được module hóa thành các Microservices tách biệt (Event-Driven), giúp việc nâng cấp hay sửa lỗi một tính năng không làm gián đoạn toàn bộ hệ thống.
 - **Trải nghiệm người dùng vượt trội:** Số hóa hoàn toàn thủ tục giấy tờ, cung cấp môi trường làm việc thông minh, hiện đại và minh bạch cho toàn bộ nhân sự.
-
-#### Kết quả kỹ thuật
-
-Sau khi hoàn thành dự án, các kết quả kỹ thuật mong đợi bao gồm:
-
-* Backend FastAPI hoạt động với hơn 20 API endpoints.
-* Face registration và recognition với accuracy trên 95%.
-* Face Liveness Detection hoạt động, ngăn chặn gian lận.
-* 8 DynamoDB tables với data đầy đủ.
-* Event-driven architecture với EventBridge, SQS và Lambda workers.
-* S3 Data Lake với data partitioned by date.
-* Glue Crawler tự động update schema.
-* Athena queries trả về kết quả chính xác.
-* AI Assistant trả lời câu hỏi tiếng Việt.
-* CloudWatch Dashboard với metrics realtime.
-* CI/CD pipeline tự động deploy.
-* Frontend React app hosted trên CloudFront.
-* Security hardened với WAF, Cognito và IAM.
-* Hướng dẫn cleanup toàn bộ tài nguyên AWS.
-
-#### Kết quả nghiệp vụ
-
-Smart Campus cung cấp quy trình quản lý có cấu trúc. Thay vì điểm danh thủ công hoặc dùng thẻ từ dễ gian lận, mỗi lần điểm danh trở thành một record có timestamp, status, confidence score và camera_id.
-
-Ví dụ, khi nhân viên đứng trước camera, hệ thống tự động nhận diện khuôn mặt, kiểm tra liveness, áp dụng rule engine và ghi nhận kết quả PRESENT hoặc LATE trong 2 đến 3 giây.
-
-#### Kết quả học tập
-
-Dự án giúp thể hiện kiến thức thực tế về:
-
-* Thiết kế serverless architecture trên AWS.
-* Xây dựng event-driven systems.
-* Tích hợp AI/ML services bao gồm Rekognition và Bedrock.
-* Xây dựng Data Lake analytics pipeline.
-* Monitoring và troubleshooting.
-* Security best practices.
-* Cost optimization.
-* CI/CD automation.
-
-#### Giá trị dài hạn
-
-Smart Campus có thể được mở rộng thành các hướng phát triển tương lai bao gồm multi-tenant SaaS platform, mobile app cho iOS và Android, IoT integration với smart cameras, advanced analytics với SageMaker, geofencing với location services và integration với ERP hoặc CRM systems.
-
-Dự án được thiết kế như một use-case AWS thực tế. Nó cho thấy AWS không chỉ hỗ trợ host ứng dụng, mà còn hỗ trợ tự động hóa triển khai, lưu trữ dữ liệu, xử lý AI/ML, phân tích dữ liệu, giám sát, bảo mật và kiểm soát chi phí vận hành.

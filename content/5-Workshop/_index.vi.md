@@ -6,63 +6,26 @@ chapter: false
 pre: " <b> 5. </b> "
 ---
 
-
-# Smart Campus - Hệ Thống Điểm Danh Serverless với Nhận Diện Khuôn Mặt
-
-## Xây dựng hệ thống điểm danh thông minh với AWS Rekognition, Lambda, DynamoDB và Event-Driven Architecture
+# Triển khai Hệ thống Smart Campus Platform (Serverless) trên AWS
 
 #### Tổng quan
 
-Trong workshop này, bạn sẽ học cách xây dựng một hệ thống điểm danh serverless production-grade sử dụng công nghệ nhận diện khuôn mặt AI. Hệ thống không chỉ nhận diện khuôn mặt mà còn tích hợp **Face Liveness Detection** để chống gian lận (phát hiện ảnh in, video replay, mặt nạ 3D), xây dựng kiến trúc **Event-Driven** với EventBridge và SQS để đảm bảo reliability, và tạo **Data Lake** cho analytics với Athena và Glue.
+**Smart Campus** là một nền tảng quản lý khuôn viên thông minh 100% Serverless, giải quyết bài toán điểm danh bằng khuôn mặt (AI) và tự động hóa các luồng công việc nhân sự với mức chi phí tối ưu nhất nhờ cơ chế Pay-As-You-Go.
 
-**Bạn sẽ học được:**
-- Thiết kế và triển khai serverless architecture trên AWS
-- Tích hợp AI/ML services (Rekognition Face Recognition + Liveness Detection)
-- Xây dựng event-driven systems với EventBridge, SQS
-- Implement reliable messaging với Dead Letter Queues
-- Tạo Data Lake analytics pipeline với S3, Glue, Athena
-- Setup monitoring và alerting với CloudWatch
-- Áp dụng security best practices (WAF, Cognito, IAM)
-- Tối ưu chi phí cho serverless applications
+Trong Workshop này, bạn sẽ được hướng dẫn triển khai từ đầu đến cuối (End-to-End) toàn bộ kiến trúc của hệ thống, học cách kết nối và cấu hình bảo mật cho hơn 15 dịch vụ AWS khác nhau, từ Frontend, API, Database, cho đến các luồng Event-Driven và Data Analytics.
 
-**Thời gian ước tính:** 3-4 giờ
+Thay vì cấu hình bằng tay (ClickOps), workshop này cũng sẽ hướng dẫn bạn các bước thiết lập chuẩn chỉ, cấu hình các biến môi trường và liên kết các dịch vụ theo đúng nguyên tắc **Đặc quyền tối thiểu (Least Privilege)**.
 
-**Chi phí ước tính:** ~$10-15 USD (nếu cleanup sau 24h)
+#### Nội dung Workshop
 
-#### Workflow chính
-
-Trong workshop này, bạn sẽ triển khai workflow điểm danh hoàn chỉnh:
-
-```
-Camera chụp ảnh khuôn mặt
-  → API Gateway nhận request
-  → Lambda xử lý
-  → Rekognition Face Liveness Check (phát hiện ảnh in/video)
-  → Rekognition Face Recognition (nhận diện khuôn mặt)
-  → Rule Engine validation (check trùng, check session, check time)
-  → Lưu attendance record vào DynamoDB
-  → Publish event lên EventBridge
-  → EventBridge route đến SQS Queues
-  → Lambda Workers xử lý (Analytics, Notification)
-  → Kết quả: Record trong Data Lake, Email notification
-```
-
-**Các loại endpoints bạn sẽ tạo:**
-- **Gateway VPC Endpoint**: Để truy cập S3 từ Lambda trong VPC (nếu cần)
-- **Interface VPC Endpoint**: Để truy cập Rekognition, DynamoDB từ VPC (optional)
-- **API Gateway HTTP Endpoint**: Public endpoint cho attendance check-in
-
-#### Nội dung
-
-1. [Tổng quan Workshop](5.1-overview)
-2. [Yêu cầu trước khi bắt đầu](5.2-prerequisite/)
-3. [Bước 1: Setup DynamoDB Tables](5.3-dynamodb/)
-4. [Bước 2: Tạo Rekognition Face Collection](5.4-rekognition/)
-5. [Bước 3: Deploy Lambda Functions](5.5-lambda/)
-6. [Bước 4: Configure API Gateway](5.6-apigateway/)
-7. [Bước 5: Setup EventBridge & SQS](5.7-eventbridge/)
-8. [Bước 6: Tạo Analytics Pipeline](5.8-analytics/)
-9. [Bước 7: Testing hệ thống](5.9-testing/)
-10. [Bước 8: Monitoring với CloudWatch](5.10-monitoring/)
-11. [Bước 9: Tối ưu chi phí và bảo mật](5.11-optimization/)
-12. [Dọn dẹp resources](5.12-cleanup/)
+1. [Giới thiệu](5.1-Workshop-overview/)
+2. [Chuẩn bị tài nguyên](5.2-Prerequiste/)
+3. [Cấu hình Xác thực & Bảo mật](5.3-Auth-Security/)
+4. [Cấu hình DB & Lưu trữ](5.4-Database-Storage/)
+5. [Cấu hình Core API](5.5-AI-API/)
+6. [Kiến trúc Event-Driven](5.6-Event-Driven/)
+7. [Data Analytics (S3 & Athena)](5.7-Data-Analytics/)
+8. [Triển khai & Tự động hóa CI/CD](5.8-CI-CD-Frontend/)
+9. [Giám sát & Theo dõi](5.9-Monitoring-Tracing/)
+10. [Kiểm thử (Testing & Validation)](5.10-Testing-Validation/)
+11. [Dọn dẹp tài nguyên](5.11-Cleanup/)
