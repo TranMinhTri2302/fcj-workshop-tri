@@ -1,26 +1,26 @@
 ---
 title: "Worklog"
-date: 2024-01-01
+date: 2024-08-10
 weight: 1
 chapter: false
 pre: " <b> 1. </b> "
 ---
 
 
-My internship spanned 8 weeks, from June 22, 2026, to August 15, 2026. Throughout this period, I learned about core AWS services while simultaneously applying that knowledge to build my project.
+My internship lasted for 8 weeks, from June 22, 2026 to August 15, 2026. Throughout this period, I learned and practiced foundational AWS services while directly applying them to build the Smart Campus Platform project.
 
-**Week 1:** [Onboarding to the environment – Cloud Computing foundations – hands-on practice with core AWS services](1.1-week1/)
+**Week 1:** [AWS Environment Setup and Project Orientation](1.1-week1/)
 
-**Week 2:** [Problem analysis – system architecture design – technical stack selection](1.2-week2/)
+**Week 2:** [Business Analysis and System Architecture Design](1.2-week2/)
 
-**Week 3:** [Initializing Frontend & Backend – integrating Cognito, DynamoDB, S3 – setting up CI/CD](1.3-week3/)
+**Week 3:** [Frontend Foundation and Core Services Integration](1.3-week3/)
 
-**Week 4:** [HR & attendance UI – integrating Rekognition – Tasks module – handling integration errors](1.4-week4/)
+**Week 4:** [Attendance UI Implementation and Face Recognition Flow](1.4-week4/)
 
-**Week 5:** [Tasks UI – notification & analytics pipeline – consolidating the team PoC](1.5-week5/)
+**Week 5:** [Task Management Interface and Analytics Initialization](1.5-week5/)
 
-**Week 6:** [Analytics dashboard & RBAC – advanced biometrics – Well-Architected review](1.6-week6/)
+**Week 6:** [Dashboard Finalization, RBAC, and Advanced Authentication](1.6-week6/)
 
-**Week 7:** [Leave management – standardizing RBAC – workshop & blog – deploying S3/CloudFront](1.7-week7/)
+**Week 7:** [Leave Management Development and System Deployment (S3/CloudFront)](1.7-week7/)
 
-**Week 8:** [Observability & message queue – Face Liveness – workshop documentation – final project wrap-up](1.8-week8/)
+**Week 8:** [Face Liveness Integration and Workshop Documentation Wrap-up](1.8-week8/)

@@ -1,5 +1,5 @@
 ---
-title: "Week 6 Worklog"
+title: "Worklog Week 6"
 date: 2026-07-27
 weight: 6
 chapter: false
@@ -8,46 +8,39 @@ pre: " <b> 1.6. </b> "
 
 # Week 6: Analytics Dashboard & RBAC – Advanced Biometrics – Well-Architected Review
 
-## 1. Weekly objectives
+## 1. Weekly Objectives
 
-* Redesign the dashboard to visualize data more clearly, make Analytics the main page, and organize the interface by role.
-* Upgrade the Cognito authentication flow, add personal face registration, enable face-based login, and support password recovery using biometrics.
-* Add the Login screen, protect routes, and increase consistency between user roles and the displayed data.
-* Review the system against the AWS Well-Architected Framework and rebalance the design under AWS credit constraints.
+* Redesign the Dashboard into a more effective Analytics homepage with role-based data visibility.
+* Complete authentication-related screens such as Login, Private Route, and role-dependent UI behaviors.
+* Add UI support for advanced biometric flows such as personal face registration and related verification steps.
+* Reassess the system architecture using the AWS Well-Architected Framework and update any points affecting display logic and frontend integration.
 
-## 2. Detailed work log
+## 2. Detailed Work Log
 
-| Day | Task | Start Date | Completion Date | Reference Material |
+| Day | Tasks | Start Date | End Date | References |
 | --- | --- | --- | --- | --- |
-| 2 | - Design a **dual data flow**: a daily reporting update flow through EventBridge and a direct query flow through Athena <br> - Apply the 6 pillars of the **AWS Well-Architected Framework** to review the architecture from the perspectives of operations, security, reliability, performance, cost, and sustainability <br> - Reassign team roles: FE, BE, CI/CD, data processing, and monitoring; update the layered architecture diagram at the same time <br> - Prepare a response plan for AWS credit limits as the project moved into the finalization stage | 27/07/2026 | 27/07/2026 | <https://docs.aws.amazon.com/wellarchitected/> |
-| 3 | - **Frontend:** Redesign the KPI Summary Cards on the Analytics page; build a Circular Progress Ring (SVG) and Donut Chart (SVG) to show work/attendance ratios <br> - **Backend:** Complete WF1 – Cognito administration: use `admin_create_user` in the Admin endpoint to create accounts so Cognito generates a Temporary Password and sends it by email to new staff | 28/07/2026 | 28/07/2026 | <https://docs.aws.amazon.com/cognito/> |
-| 4 | - **Frontend:** Build a gradient Area Chart for attendance trends over time, a list of employees with the highest absence rates using progress bars with color thresholds, and update the data dynamically from the Analytics/Reports endpoint <br> - **Backend:** Complete the biometric flow: the My Profile page allows employees to register their face via Webcam + Upload; prevent duplicates using SearchFacesByImage before IndexFaces | 29/07/2026 | 29/07/2026 | <https://docs.aws.amazon.com/rekognition/> |
-| 5 | - **Frontend:** Build the Login screen with Cognito authentication, handle the temporary password change flow, and redirect users after sign-in <br> - Create a Private Route / HOC mechanism to block unauthenticated users from internal pages <br> - **Backend:** Complete face-based login that returns a JWT token; build a face-based password recovery flow that receives an email and a base64 image, verifies it via Rekognition, and resets the password on Cognito; handle cases where a `face_id` is duplicated | 30/07/2026 | 30/07/2026 | <https://docs.aws.amazon.com/cognito/> <br> <https://docs.aws.amazon.com/rekognition/> |
-| 6 | - **Frontend:** Fully integrate 3-layer RBAC in the frontend: ADMIN/DIRECTOR can view the entire system, MANAGER is restricted by department, STAFF is redirected to “My Analytics” <br> - Complete the Analytics.jsx page as the home page, optimize the layout and responsiveness <br> - Fix the memory leak caused by the camera when switching tabs with `stopFaceCamera()` <br> - Review the new interface end to end to ensure consistency between JWT roles, route protection, and displayed data | 31/07/2026 | 01/08/2026 | — |
+| 2 | - Reviewed the system’s dual data flow: scheduled reporting updates and direct user-requested query flow <br> - Updated the layered architecture diagram, role matrix, and the points affecting data visibility in the UI <br> - Took notes on cost, performance, and service-scope trade-offs after the team’s AWS Well-Architected review | 27/07/2026 | 27/07/2026 | <https://docs.aws.amazon.com/wellarchitected/> |
+| 3 | - Redesigned KPI Summary Cards for the Analytics homepage <br> - Built a Circular Progress Ring (SVG) and a Donut Chart (pure SVG) to display attendance/task ratios without relying on external chart libraries <br> - Rechecked the data groups and several responses related to account management, roles, and the dashboard | 28/07/2026 | 28/07/2026 | <https://react.dev/> |
+| 4 | - Built a gradient Area Chart for attendance trends over time and a Top Absent Employees list with color-threshold progress bars <br> - Connected dynamic data from Analytics/Reports endpoints <br> - Added the `My Profile` interface allowing users to register their own face using Webcam + Upload, and reviewed the end-to-end states of this flow | 29/07/2026 | 29/07/2026 | <https://docs.aws.amazon.com/rekognition/> |
+| 5 | - Built the Login screen integrated with Cognito, including temporary password reset flow and post-login redirection <br> - Implemented Private Route/HOC to block unauthenticated users from internal pages <br> - Reviewed the user experience for authentication, face registration, face login, and account recovery from the UI perspective | 30/07/2026 | 30/07/2026 | <https://docs.aws.amazon.com/cognito/> |
+| 6 | - Implemented three-layer RBAC entirely on the frontend: ADMIN/DIRECTOR can view the entire system, MANAGER is limited to their department, and STAFF is switched to “My Analytics” <br> - Finalized `Analytics.jsx` as the homepage and improved layout responsiveness <br> - Fixed the camera memory leak issue when switching tabs using `stopFaceCamera()` <br> - Helped recheck role fields, tokens, and data rendering to ensure consistency between JWT, route protection, and the system’s authorization rules | 31/07/2026 | 01/08/2026 | — |
 
-## 3. Personal contributions
+## 3. Personal Contributions
 
-* Served as the main contributor to the frontend this week:
-  * turned Analytics.jsx into the home page;
+* Took primary responsibility for the UI work of the week:
+  * turned `Analytics.jsx` into the homepage;
   * built KPI cards;
-  * implemented custom SVG charts like Donut Chart, Progress Ring, Area Chart, and Progress Bar without external libraries;
-  * completed the Login screen and Private Route;
-  * implemented 3-level RBAC in the UI;
-  * handled the camera lifecycle issue when switching tabs.
-* Updated the way data was displayed by role so the UI reflected the appropriate access rights of each user group.
-* Reviewed the authentication and biometric flow from the end-user perspective to ensure that sign-in, temporary password changes, and password recovery worked together properly.
-* Noted the trade-offs that needed to be balanced between cost, performance, and service scope after reviewing the system under the Well-Architected lens.
+  * hand-coded SVG charts such as Donut Chart, Progress Ring, Area Chart, and Progress Bars;
+  * completed Login and Private Route;
+  * implemented three-layer RBAC on the interface;
+  * fixed the camera issue when switching tabs.
+* Updated data visibility based on role so that the UI accurately reflected each user group’s access scope.
+* Reviewed the authentication and biometric flows from an end-user perspective to ensure that login, temporary password reset, face registration, and related error states formed a consistent experience.
+* Documented the cost, performance, and service-scope trade-offs identified during the Well-Architected review.
 
-## 4. Achievements
+## 4. Outcomes Achieved
 
-* Frontend:
-  * The dashboard was redesigned into a more visual Analytics page with role-based layering and no dependency on third-party chart libraries.
-  * Login, Private Route, and frontend RBAC worked in sync with JWT.
-
-* Backend and authentication:
-  * Completed the Cognito flow for account administration more fully.
-  * The personal face registration, face-based login, and biometric password recovery flows were integrated into the system.
-
-* Optimization and review:
-  * Resolved the camera lifecycle issue when switching tabs.
-  * Completed the architecture review using the Well-Architected Framework and clarified the trade-offs related to cost and operability.
+* Redesigned the dashboard into a more visual Analytics homepage with role-based display and no dependency on external chart libraries.
+* Achieved consistent integration of Login, Private Route, and frontend RBAC with JWT-based authorization.
+* Connected the UI for personal face registration, face login, and related authentication steps into the system flow.
+* Resolved the camera lifecycle issue when switching tabs and completed the architecture review from a Well-Architected perspective.

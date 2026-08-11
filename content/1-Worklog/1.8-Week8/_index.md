@@ -1,34 +1,34 @@
 ---
-title: "Week 8 Worklog"
+title: "Worklog Week 8"
 date: 2026-08-10
 weight: 8
 chapter: false
 pre: " <b> 1.8. </b> "
 ---
 
-# Week 8: Observability & Message Queue – Face Liveness – Workshop Documentation – Final Project Wrap-up
+# Week 8: Face Liveness – Workshop Documentation – System Review and Project Wrap-up
 
-## 1. Weekly objectives
+## 1. Weekly Objectives
 
-* Add an observability layer to the system using AWS X-Ray, CloudWatch Alarm, and SNS Alerting.
-* Increase the reliability of the event pipeline through Amazon SQS.
-* Research and build a PoC for fraud-resistant attendance using Amazon Rekognition Face Liveness.
-* Complete the workshop documentation, internship report, technical documentation, and final project wrap-up.
+* Finalize the UI and testing for end-stage flows, especially Face Liveness and attendance-related features.
+* Recheck monitoring results, alerts, and evaluation-related components to ensure that the UI reflects the real system flow correctly.
+* Complete the workshop documentation, event reflection reports, technical materials, and the final project summary.
+* Prepare handover materials and presentation slides for demonstration and evaluation.
 
-## 2. Detailed work log
+## 2. Detailed Work Log
 
-| Day | Task | Start Date | Completion Date | Reference Material |
+| Day | Tasks | Start Date | End Date | References |
 | --- | --- | --- | --- | --- |
-| 2 | - Implement the **Observability** layer with AWS X-Ray: add `aws-xray-sdk` to `requirements.txt`, call `patch_all()` in `main.py` to trace boto3 calls to DynamoDB, Rekognition, and S3 <br> - Resolve Segment conflicts on Lambda by checking `AWS_LAMBDA_FUNCTION_NAME` at startup; if running on Lambda, skip attaching `XRayMiddleware` and keep only `patch_all()` for sub-segment tracing <br> - Review the Service Map and Trace Timeline in the X-Ray Console and note that `Rekognition:SearchFacesByImage` had the highest latency | 10/08/2026 | 10/08/2026 | <https://docs.aws.amazon.com/xray/> |
-| 3 | - Set up **CloudWatch Alarm + SNS Alerting**: monitor the `Errors` metric of the Lambda `smart-campus-api` and send warning emails to Admin when the system encounters issues <br> - Separate system errors (5xx) from user errors (4xx) to avoid false alarms <br> - Verify the alerting mechanism by creating a controlled error <br> - Add **Amazon SQS** between EventBridge and Lambda as a buffer layer for the event pipeline | 11/08/2026 | 11/08/2026 | <https://docs.aws.amazon.com/AmazonCloudWatch/> <br> <https://docs.aws.amazon.com/sns/> <br> <https://docs.aws.amazon.com/sqs/> |
-| 4 | - Research and implement a PoC for **Amazon Rekognition Face Liveness**: the backend uses `CreateFaceLivenessSession` → `GetFaceLivenessSessionResults`, blocks the process if `confidence < 90%`, and only continues to `SearchFacesByImage` using the `ReferenceImage` from the session when the threshold is met <br> - **Frontend:** Integrate a Face Liveness UI using the `@aws-amplify/ui-react-liveness` SDK and gradually replace the static frame-capture flow in Attendance.jsx | 12/08/2026 | 12/08/2026 | <https://docs.aws.amazon.com/rekognition/latest/dg/face-liveness.html> <br> <https://ui.docs.amplify.aws/react/connected-components/liveness> |
-| 5 | - Perform End-to-End System Testing for the entire system, review the main flows on the UI and backend before handover <br> - Complete the **Workshop Documentation** according to the FCJ Workshop Template, add illustrations and technical descriptions for each section <br> - Write or refine content for the sections: Workshop Overview, Prerequisite, Auth & Security, Database & Storage, Data Analytics, Monitoring & Tracing, and Testing & Validation | 13/08/2026 | 13/08/2026 | FCJ Workshop Template |
-| 6 | - Finalize the workshop documentation, consolidate technical documents such as architecture, API, database schema, and the main system flows <br> - Update the internship report for the 3 events attended and align the content with the workshop/report summary <br> - Review the system architecture one last time, write the final project conclusion, outline future development directions, and prepare the handover documentation and presentation slides | 14/08/2026 | 15/08/2026 | — |
+| 2 | - Reviewed the system flows after observability components were added, comparing Service Map, traces, and alert points with the actual interface behavior <br> - Documented the items that needed to be included in the workshop documentation and final technical summary, especially for Monitoring/Tracing and attendance-related processing flows <br> - Rechecked error responses and abnormal states that could affect user experience | 10/08/2026 | 10/08/2026 | <https://docs.aws.amazon.com/xray/> |
+| 3 | - Rechecked alerting flows and error cases that could affect user experience, especially when the system returned errors or timed out <br> - Reviewed UI notes and descriptions related to the event-processing pipeline to ensure the documentation matched the running system <br> - Helped cross-check several flow changes so that the technical summary would remain consistent with the actual implementation | 11/08/2026 | 11/08/2026 | <https://docs.aws.amazon.com/AmazonCloudWatch/> <br> <https://docs.aws.amazon.com/sns/> |
+| 4 | - Integrated the Face Liveness interface using the `@aws-amplify/ui-react-liveness` SDK, gradually replacing the static frame capture flow in `Attendance.jsx` <br> - Rechecked display states, user guidance for face alignment, and the transition flow after receiving Face Liveness results <br> - Cross-checked the `confidence` threshold and returned data so that the UI handled pass/fail cases correctly | 12/08/2026 | 12/08/2026 | <https://docs.aws.amazon.com/rekognition/latest/dg/face-liveness.html> <br> <https://ui.docs.amplify.aws/react/connected-components/liveness> |
+| 5 | - Performed system end-to-end testing for the entire application, rechecking the main user flows in the interface before handover <br> - Finalized the **Workshop Documentation** according to the FCJ Workshop Template, adding screenshots and technical explanations for each section <br> - Wrote/edited content for: Workshop Overview, Prerequisite, Auth & Security, Database & Storage, Data Analytics, Monitoring & Tracing, Testing & Validation | 13/08/2026 | 13/08/2026 | FCJ Workshop Template |
+| 6 | - Completed the workshop documentation and consolidated technical materials such as architecture, APIs, database schema, and the system’s core flows <br> - Updated the reflection reports for the three attended events and cross-checked them against the workshop/final report content <br> - Performed a final review of the overall system architecture, wrote the project conclusion and future directions, and prepared handover documents and presentation slides | 14/08/2026 | 15/08/2026 | — |
 
-## 3. Personal contributions
+## 3. Personal Contributions
 
-* Contributed to the frontend around Face Liveness, end-to-end testing, and the overall user experience review before handover.
-* Significantly updated and completed the workshop documentation, especially for the sections:
+* Took charge of the Face Liveness-related UI, end-to-end testing, and final user experience review before handover.
+* Significantly updated and completed the workshop documentation, especially in the following sections in 5-Workshop:
   * Workshop Overview
   * Prerequisite
   * Auth & Security
@@ -36,22 +36,13 @@ pre: " <b> 1.8. </b> "
   * Data Analytics
   * Monitoring & Tracing
   * Testing & Validation
-* Followed the observability work at the integration level and verified the trace and alert outcomes against the real system flows.
-* Added technical synthesis, event reports, and final project handover documentation.
+* Followed the observability integration at the practical level and compared trace/alert results against the real system flow to ensure that the technical descriptions matched the product.
+* Added the final technical summary, event reflection reports, and end-of-project handover materials.
 
-## 4. Achievements
+## 4. Outcomes Achieved
 
-* Observability and monitoring:
-  * Completed the basic observability layer with X-Ray, CloudWatch Alarm, and SNS Alerting.
-  * Identified the main bottleneck at `Rekognition:SearchFacesByImage`.
-  * Resolved the Lambda segment conflict by adjusting how tracing was attached for the runtime environment.
-
-* Architecture reliability:
-  * Added SQS as a buffering layer for the event pipeline, reducing the risk of data loss during sudden traffic spikes.
-
-* Attendance fraud prevention:
-  * Completed a viable Face Liveness PoC that could be extended further in future system development.
-
-* Documentation and delivery:
-  * Completed the workshop documentation, technical documentation, event reports, final project summary, and handover documentation.
-  * The Smart Campus Platform reached a level of completeness suitable for demonstration and final evaluation.
+* Finalized the Face Liveness interface and rechecked all important user flows before final evaluation.
+* End-to-end testing helped identify and correct remaining issues during the final stage.
+* Completed the workshop documentation, technical materials, event reflection reports, project conclusion, and handover package.
+* Updated Monitoring/Tracing and related technical sections so that they matched the real system more closely.
+* Brought the Smart Campus Platform to a complete enough state for final demonstration and evaluation.
