@@ -111,7 +111,7 @@ Tuy nhiên, em nghĩ các bạn nên chuẩn bị trước một số kiến th�
 
 ### Cảm nhận cá nhân sau quá trình thực tập
 
-> Kỳ thực tập này là cầu nối rất rõ ràng giữa kiến thức học thuật và công việc thực tế trong ngành. Trước khi bắt đầu, em biết còn kLambda là gì và hiểu một số khái niệm cloud cơ bản. Sau kỳ thực tập, em không chỉ biết sử dụng dịch vụ, mà còn hiểu cách suy nghĩ khi thiết kế một hệ thống serverless: làm sao để hệ thống có khả năng mở rộng, dễ quan sát, có cơ chế xử lý lỗi, đảm bảo bảo mật và kiểm soát được chi phí.
+> Kỳ thực tập này là cầu nối rất rõ ràng giữa kiến thức học thuật và công việc thực tế trong ngành. Trước khi bắt đầu, em còn chưa biết rõ Lambda là gì và hiểu một số khái niệm cloud cơ bản. Sau kỳ thực tập, em không chỉ biết sử dụng dịch vụ, mà còn hiểu cách suy nghĩ khi thiết kế một hệ thống serverless: làm sao để hệ thống có khả năng mở rộng, dễ quan sát, có cơ chế xử lý lỗi, đảm bảo bảo mật và kiểm soát được chi phí.
 >
 > Điều em trân trọng nhất là sự kiên nhẫn của các mentor, sự cởi mở của team và việc FCAJ sẵn sàng giao cho intern những trách nhiệm thực tế. Những buổi event kéo dài, những lần nhận feedback khi review code - sơ đồ hay những buổi thảo luận kiến trúc đều là các trải nghiệm giúp em trưởng thành hơn rất nhiều.
 >
