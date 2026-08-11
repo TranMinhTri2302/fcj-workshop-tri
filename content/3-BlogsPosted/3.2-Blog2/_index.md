@@ -176,5 +176,5 @@ If your system currently relies only on SearchFacesByImage, it only answers the 
 [Amazon Rekognition Face Liveness — Amplify UI React Documentation](https://ui.docs.amplify.aws/react/connected-components/liveness)
 
 **Blog Image:**  
-![Blog 2-1](images/3-Blog/Blog-2.png)
-![Blog 2-2](images/3-Blog/Blog-2-1.png)
+![Blog 2-1](/images/3-Blog/Blog-2.png)
+![Blog 2-2](/images/3-Blog/Blog-2-1.png)

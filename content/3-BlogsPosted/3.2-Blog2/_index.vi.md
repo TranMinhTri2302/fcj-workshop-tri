@@ -176,5 +176,5 @@ Nếu hệ thống của bạn đang chỉ dùng SearchFacesByImage, nó mới g
 [Amazon Rekognition Face Liveness — Amplify UI React Documentation](https://ui.docs.amplify.aws/react/connected-components/liveness)
 
 **Hình của Blog:**  
-![Blog 2-1](images/3-Blog/Blog-2.png)
-![Blog 2-2](images/3-Blog/Blog-2-1.png)
+![Blog 2-1](/images/3-Blog/Blog-2.png)
+![Blog 2-2](/images/3-Blog/Blog-2-1.png)

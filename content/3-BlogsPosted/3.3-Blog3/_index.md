@@ -181,4 +181,4 @@ If your organization struggles with month-end variance reports, is often caught 
 [Improve your monthly cloud variance analysis with a weekly FinOps checkpoint — AWS Cloud Financial Management Blog](https://aws.amazon.com/blogs/aws-cloud-financial-management/improve-your-monthly-cloud-variance-analysis-with-a-weekly-finops-checkpoint/)
 
 **Blog Image:**  
-![Blog 3](images/3-Blog/Blog-3.png)
+![Blog 3](/images/3-Blog/Blog-3.png)
