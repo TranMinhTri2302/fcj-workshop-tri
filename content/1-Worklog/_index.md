@@ -7,23 +7,20 @@ pre: " <b> 1. </b> "
 ---
 
 
+My internship spanned 8 weeks, from June 22, 2026, to August 15, 2026. Throughout this period, I learned about core AWS services while simultaneously applying that knowledge to build my project.
 
-**On this page**, you will need to introduce your worklog. **How** did you complete it? How many weeks did you take to complete the program? **What** did you do in those weeks?
+**Week 1:** [Onboarding to the environment – Cloud Computing foundations – hands-on practice with core AWS services](1.1-week1/)
 
-Typically, and as a standard, a worklog is carried out over about 8 weeks (matching the internship period) with weekly contents as follows:
+**Week 2:** [Problem analysis – system architecture design – technical stack selection](1.2-week2/)
 
-**Week 1:** [Getting familiar with AWS and basic AWS services](1.1-week1/)
+**Week 3:** [Initializing Frontend & Backend – integrating Cognito, DynamoDB, S3 – setting up CI/CD](1.3-week3/)
 
-**Week 2:** [Designing system architecture and exploring backend options](1.2-week2/)
+**Week 4:** [HR & attendance UI – integrating Rekognition – Tasks module – handling integration errors](1.4-week4/)
 
-**Week 3:** [Choosing the Smart Campus project and finalizing the architecture](1.3-week3/)
+**Week 5:** [Tasks UI – notification & analytics pipeline – consolidating the team PoC](1.5-week5/)
 
-**Week 4:** [Implementing the FastAPI backend and setting up Cognito](1.4-week4/)
+**Week 6:** [Analytics dashboard & RBAC – advanced biometrics – Well-Architected review](1.6-week6/)
 
-**Week 5:** [Developing the Tasks module and integrating Rekognition](1.5-week5/)
+**Week 7:** [Leave management – standardizing RBAC – workshop & blog – deploying S3/CloudFront](1.7-week7/)
 
-**Week 6:** [Upgrading Analytics, SES/SNS, and Cognito flows](1.6-week6/)
-
-**Week 7:** [Expanding features and refining the system](1.7-week7/)
-
-**Week 8:** [Summarizing progress and internship outcomes](1.8-week8/)
+**Week 8:** [Observability & message queue – Face Liveness – workshop documentation – final project wrap-up](1.8-week8/)

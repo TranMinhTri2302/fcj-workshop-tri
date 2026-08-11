@@ -1,32 +1,48 @@
 ---
 title: "Week 1 Worklog"
-date: 2024-01-01
+date: 2026-06-22
 weight: 1
 chapter: false
 pre: " <b> 1.1. </b> "
 ---
 
-### Week 1 Objectives:
+# Week 1: Onboarding to the Environment – Cloud Computing Foundations – Hands-on Practice with Core AWS Services
 
-* Get familiar with the working environment at the Bitexco office, connect with members of the program, and form the project team.
-* Understand the overall structure of the AWS program, including the learning model, lab costs, and programming prerequisites.
-* Build a solid foundation in cloud computing concepts and begin practical hands-on experience with AWS services.
+## 1. Weekly objectives
 
-### Tasks completed this week:
+* Get familiar with the working environment at the Bitexco office, connect with members of the program, and begin forming the project team.
+* Understand the foundational concepts of Cloud Computing, including Data Center, Region, Availability Zone, the shared responsibility model, and the role of cloud infrastructure in enterprises.
+* Set up a personal AWS account with basic security configurations and practice initial core services such as EC2, S3, and the AWS CLI.
+* Begin studying AWS networking architecture (VPC) and review the internship project requirements carefully in preparation for the system analysis phase.
+
+## 2. Detailed work log
+
 | Day | Task | Start Date | Completion Date | Reference Material |
 | --- | --- | --- | --- | --- |
-| 2 | - Get acquainted with the Bitexco working environment <br> - Connect with program members and form the project team <br> - Review internship rules and internal working expectations | 22/06/2026 | 22/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
-| 3 | - Learn about the AWS program structure, including the learning model, lab costs, and technical prerequisites <br> - Study core cloud concepts such as Data Center, Region, Availability Zone, and the role of cloud infrastructure in enterprise environments | 23/06/2026 | 23/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
-| 4 | - Create a personal AWS account and configure basic security practices such as MFA <br> - Get familiar with the AWS Management Console <br> - Learn the basics of AWS CLI, including installation and configuration | 24/06/2026 | 24/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
-| 5 | - Practice basic AWS labs: launch an EC2 instance and connect via SSH <br> - Create and manage an S3 bucket for data storage | 25/06/2026 | 25/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
-| 6 | - Start exploring VPC and core networking components such as Subnet, Route Table, Internet Gateway, and Security Group <br> - Discuss and shortlist possible project topics, including Smart Campus and Ticket System | 26/06/2026 | 26/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
-| 7 | - Attend FCAJ Community Day and gain real-world exposure to Cloud, AI, DevOps, Security, and AWS architecture patterns used in enterprises | 27/06/2026 | 27/06/2026 | <https://cloudjourney.awsstudygroup.com/> <br> [FCAJ Community Day video](https://www.youtube.com/watch?v=G8-WlI7f6dE) |
+| 2 | - Get familiar with the working environment at the Bitexco office, connect with members of the program <br> - Learn about the internship rules, regulations, and general operating practices <br> - Start forming the project team and discuss each member’s technical strengths and direction | 22/06/2026 | 22/06/2026 | <https://cloudjourney.awsstudygroup.com/> |
+| 3 | - Review the AWS program overview: the workshop/lab-based learning model, lab costs and credits, programming prerequisites, and evaluation direction <br> - Study core Cloud Computing concepts such as Data Center, Region, and Availability Zone <br> - Understand the role of cloud infrastructure in enterprises and why organizations often choose cloud over on-premises solutions for certain use cases | 23/06/2026 | 23/06/2026 | <https://cloudjourney.awsstudygroup.com/> <br> <https://docs.aws.amazon.com/whitepapers/latest/aws-overview/> |
+| 4 | - Create a personal AWS account (Free Tier), enable MFA, and establish the principle of not using the Root User for daily operations <br> - Get familiar with the AWS Management Console: navigate between services, check regions, and review the billing dashboard <br> - Install and configure the AWS CLI: set access keys, verify connectivity, and run basic commands | 24/06/2026 | 24/06/2026 | <https://docs.aws.amazon.com/cli/latest/userguide/> <br> <https://docs.aws.amazon.com/IAM/latest/UserGuide/> |
+| 5 | - Practice basic lab exercises: <br>&emsp; + Launch an EC2 instance, configure a minimal Security Group, and connect via SSH <br>&emsp; + Create an S3 bucket, upload files, manage data, and review access permissions <br> - Record the workflow for managing cloud resources through the Console and CLI for use in later weeks | 25/06/2026 | 25/06/2026 | <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/> <br> <https://docs.aws.amazon.com/AmazonS3/latest/userguide/> |
+| 6 | - Study VPC and its networking components: Subnet, Route Table, Internet Gateway, Security Group <br> - Understand the relationship between public and private subnets in system design <br> - Review the AWS project requirements carefully and note the evaluation criteria and mandatory items that must appear in the report and workshop <br> - Discuss the group’s project direction internally, comparing Smart Campus and Ticket System at a preliminary level | 26/06/2026 | 26/06/2026 | <https://docs.aws.amazon.com/vpc/latest/userguide/> |
 
-### Week 1 Achievements:
+## 3. Personal contributions
 
-* Built a strong foundation in cloud computing by understanding core concepts such as Data Center, Region, Availability Zone, and the purpose of cloud infrastructure in business environments.
-* Created and configured a personal AWS account, applied essential security practices such as MFA, and became familiar with the AWS Management Console.
-* Completed introductory hands-on labs, including launching an EC2 instance, connecting via SSH, creating an S3 bucket, and managing data.
-* Learned the fundamentals of AWS CLI and started exploring VPC and important networking components.
-* Participated in FCAJ Community Day, which provided valuable exposure to cloud, AI, DevOps, security, and AWS architecture practices in real-world settings.
-* Began narrowing down the team project direction by discussing candidate topics such as Smart Campus and Ticket System.
+* Proactively set up a personal AWS account, configured basic security settings, and prepared an individual practice environment from the very beginning.
+* Carried out foundational labs with EC2, S3, and CLI to gain hands-on experience instead of relying only on reading documentation.
+* Collected technical notes on IAM, Region, Availability Zone, VPC, and CLI as a foundation for later system design work.
+* Discussed technical strengths and technology direction with team members, helping shape the group and select a project topic.
+* Reviewed the project requirements early and recorded the most important points related to the report, workshop, and technical implementation.
+
+## 4. Achievements
+
+* Cloud Computing and security foundation:
+  * Gained a solid understanding of core Cloud Computing concepts, AWS infrastructure architecture, and the shared responsibility model.
+  * Completed the setup of an AWS Free Tier account, MFA, and AWS CLI.
+
+* AWS service practice:
+  * Successfully completed foundational labs, including launching an EC2 instance, connecting via SSH, creating an S3 bucket, and managing data.
+  * Created an initial REST endpoint serverless experience and became familiar with safe cloud resource operations.
+
+* Preparation for the project:
+  * Built an initial foundation in VPC and core networking components.
+  * Completed the preparation step needed to move into the problem analysis and system design phase in the following week.

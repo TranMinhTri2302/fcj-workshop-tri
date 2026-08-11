@@ -1,55 +1,56 @@
 ---
 title: "Week 7 Worklog"
-date: 2024-01-01
+date: 2026-08-03
 weight: 7
 chapter: false
 pre: " <b> 1.7. </b> "
 ---
 
+# Week 7: Leave Management – Standardizing RBAC – Workshop & Blog – Deploying S3/CloudFront
 
+## 1. Weekly objectives
 
-### Week 7 Objectives:
+* Develop the Leave Management module at the data, API, and user interface levels.
+* Standardize RBAC across the codebase and handle migration of older DynamoDB data.
+* Complete the required personal program deliverables, including technical blogs, GitHub updates, and the workshop-related report.
+* Configure deployment of the frontend to Amazon S3 with CloudFront.
 
-* Connect and get acquainted with members of First Cloud AI Journey.
-* Understand basic AWS services, how to use the console & CLI.
+## 2. Detailed work log
 
-### Tasks to be carried out this week:
-| Day | Task                                                                                                                                                                                                   | Start Date | Completion Date | Reference Material                        |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | --------------- | ----------------------------------------- |
-| 2   | - Get acquainted with FCAJ members <br> - Read and take note of internship unit rules and regulations                                                                                                   | 08/11/2025 | 08/11/2025      |
-| 3   | - Learn about AWS and its types of services <br>&emsp; + Compute <br>&emsp; + Storage <br>&emsp; + Networking <br>&emsp; + Database <br>&emsp; + ... <br>                                              | 08/12/2025 | 08/12/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 4   | - Create AWS Free Tier account <br> - Learn about AWS Console & AWS CLI <br> - **Practice:** <br>&emsp; + Create AWS account <br>&emsp; + Install & configure AWS CLI <br> &emsp; + How to use AWS CLI | 08/13/2025 | 08/13/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 5   | - Learn basic EC2: <br>&emsp; + Instance types <br>&emsp; + AMI <br>&emsp; + EBS <br>&emsp; + ... <br> - SSH connection methods to EC2 <br> - Learn about Elastic IP   <br>                            | 08/14/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
-| 6   | - **Practice:** <br>&emsp; + Launch an EC2 instance <br>&emsp; + Connect via SSH <br>&emsp; + Attach an EBS volume                                                                                     | 08/15/2025 | 08/15/2025      | <https://cloudjourney.awsstudygroup.com/> |
+| Day | Task | Start Date | Completion Date | Reference Material |
+| --- | --- | --- | --- | --- |
+| 2 | - Push the team to complete the workshop deliverables on time, while reviewing the report folder structure and the content that needed to be illustrated <br> - Begin developing the **Leave Management** module: design the `smart-campus-leaves` table with GSIs `user_id-index` and `status-index`; define key attributes such as `leave_id`, `user_id`, `leave_type`, `date_from`, `date_to`, `reason`, `status`, `approved_by`, `approved_at`, and `cancel_reason` <br> - Add 4 leave types: WFH, ANNUAL_LEAVE, SICK_LEAVE, and BUSINESS_TRIP | 03/08/2026 | 03/08/2026 | <https://docs.aws.amazon.com/amazondynamodb/> |
+| 3 | - **Backend:** Complete the Leave Management APIs: employee submission → manager approval/rejection; Admin management for public holidays using the `smart-campus-holidays` table <br> - **Frontend:** Build the Leaves.jsx page with an interactive calendar that highlights dates by status (holiday, leave, WFH, weekend); the registration form auto-fills dates when selected on the calendar | 04/08/2026 | 04/08/2026 | — |
+| 4 | - **Frontend:** Complete Leaves.jsx: add Check-in WFH buttons for approved employees, synchronize PRESENT attendance without Rekognition, add Cancel and “Canceled” badges separate from “Rejected”, and refine the styling to match the shared design system <br> - **Backend:** Standardize permissions by reducing them to 5 roles (ADMIN, DIRECTOR, MANAGER, STAFF, TECHNICIAN), rename department `MAINTENANCE` to `TECHNICAL`, allow DIRECTOR to manage Users and WAF, and restrict STAFF to creating only INCIDENT-type tasks | 05/08/2026 | 05/08/2026 | — |
+| 5 | - **Backend:** Consolidate the permission matrix in `permissions.py` <br> - **Frontend:** Build `PermissionGuard` to hide or disable UI elements based on the role in the JWT <br> - Write a migration script to update old DynamoDB data and resolve 500 errors caused by incompatible schemas <br> - Complete the attendance check-out flow and fix the hard-coded WFH check-in time issue | 06/08/2026 | 06/08/2026 | — |
+| 6 | - **Deploy Frontend:** Configure the Amazon S3 bucket for Static Website Hosting and Bucket Policy; set up an Amazon CloudFront Distribution as the CDN, configure HTTPS, and verify the UI across multiple devices <br> - Write and publish **3 technical blog posts** in the AWS Study Group; update and redeploy the personal GitHub repository as evidence <br> - Update the report on activities and events attended and sync the related content into the workshop/report summary | 07/08/2026 | 08/08/2026 | <https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html> <br> <https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/> |
 
+## 3. Personal contributions
 
-### Week 7 Achievements:
+* Contributed to the frontend this week:
+  * Leaves.jsx with an interactive calendar;
+  * leave request form;
+  * WFH check-in button;
+  * distinct status badges;
+  * PermissionGuard for UI RBAC;
+  * frontend deployment to S3 + CloudFront.
+* Followed the Leave Management module from the UI through to the logic that synchronizes with Attendance, especially for approved WFH cases.
+* Reviewed the permission matrix between backend and frontend to avoid hard-coded permissions scattered throughout the code.
+* Supported the migration of older DynamoDB data, helping reduce errors caused by schema changes.
+* Prepared and completed 3 technical blog posts while updating the personal GitHub and the related workshop/report content.
 
-* Understood what AWS is and mastered the basic service groups: 
-  * Compute
-  * Storage
-  * Networking 
-  * Database
-  * ...
+## 4. Achievements
 
-* Successfully created and configured an AWS Free Tier account.
+* Frontend:
+  * Completed the Leave Management module with an interactive calendar, registration form, and WFH handling.
+  * RBAC in the UI became clearer through PermissionGuard.
+  * The frontend was successfully deployed on S3 + CloudFront with HTTPS.
 
-* Became familiar with the AWS Management Console and learned how to find, access, and use services via the web interface.
+* Backend and data:
+  * The Leave Management API worked with a clear approval flow.
+  * RBAC was standardized into 5 roles and a more centralized permission matrix.
+  * Migration of older data resolved several 500 errors caused by schema mismatch.
 
-* Installed and configured AWS CLI on the computer, including:
-  * Access Key
-  * Secret Key
-  * Default Region
-  * ...
-
-* Used AWS CLI to perform basic operations such as:
-
-  * Check account & configuration information
-  * Retrieve the list of regions
-  * View EC2 service
-  * Create and manage key pairs
-  * Check information about running services
-  * ...
-
-* Acquired the ability to connect between the web interface and CLI to manage AWS resources in parallel.
-* ...
+* Personal evidence and reporting:
+  * Completed 3 technical blog posts.
+  * Updated the personal GitHub and the report content related to the workshop and events attended.

@@ -4,12 +4,8 @@ date: 2024-01-01
 weight: 1
 chapter: false
 ---
-
     
 # Internship Report
-
-
-
 ### Student Information:
 &emsp; **Full Name:** Tran Minh Tri
 

@@ -7,24 +7,20 @@ pre: " <b> 1. </b> "
 ---
 
 
+Kỳ thực tập của em kéo dài 8 tuần, từ 22/06/2026 đến 15/08/2026. Xuyên suốt 8 tuần, em vừa học các dịch vụ AWS nền tảng, vừa áp dụng trực tiếp vào việc xây dựng đồ án.
 
-**Trong trang này** bạn sẽ cần giới thiệu worklog của bạn **như thế nào**? Bạn hoàn thành chương trình trong vòng **bao nhiêu tuần**? Bạn **đã làm gì** trong các tuần đó?
+**Tuần 1:** [Hội nhập môi trường – nền tảng Cloud Computing – thực hành dịch vụ AWS cốt lõi](1.1-week1/)
 
+**Tuần 2:** [Phân tích bài toán – thiết kế kiến trúc hệ thống – lựa chọn stack kỹ thuật](1.2-week2/)
 
-Thông thường và cũng là tiêu chuẩn, một worklog được thực hiện trong khoảng 8 tuần (phù hợp với kỳ thực tập của em) với nội dung các tuần như sau:
+**Tuần 3:** [Khởi tạo Frontend & Backend – tích hợp Cognito, DynamoDB, S3 – thiết lập CI/CD](1.3-week3/)
 
-**Tuần 1:** [Làm quen với AWS và các dịch vụ cơ bản trong AWS](1.1-week1/)
+**Tuần 4:** [UI nhân sự & điểm danh – tích hợp Rekognition – module Tasks – xử lý lỗi tích hợp](1.4-week4/)
 
-**Tuần 2:** [Thiết kế kiến trúc hệ thống và nghiên cứu backend](1.2-week2/)
+**Tuần 5:** [Quản lý công việc UI – notification & analytics pipeline – tổng hợp PoC nhóm](1.5-week5/)
 
-**Tuần 3:** [Chọn đề tài Smart Campus và chuẩn hóa kiến trúc](1.3-week3/)
+**Tuần 6:** [Dashboard Analytics & RBAC – sinh trắc học nâng cao – Well-Architected review](1.6-week6/)
 
-**Tuần 4:** [Triển khai backend FastAPI và xây dựng Cognito](1.4-week4/)
+**Tuần 7:** [Leave management – chuẩn hóa RBAC – workshop & blog – deploy S3/CloudFront](1.7-week7/)
 
-**Tuần 5:** [Phát triển module Tasks và tích hợp Rekognition](1.5-week5/)
-
-**Tuần 6:** [Nâng cấp Analytics, SES/SNS và Cognito](1.6-week6/)
-
-**Tuần 7:** [Mở rộng tính năng và hoàn thiện hệ thống](1.7-week7/)
-
-**Tuần 8:** [Tổng kết và báo cáo tiến độ thực tập](1.8-week8/)
+**Tuần 8:** [Observability & message queue – Face Liveness – workshop documentation – tổng kết đồ án](1.8-week8/)
