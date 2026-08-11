@@ -31,16 +31,6 @@ Về tác phong làm việc, em luôn cố gắng hoàn thành công việc đú
 | 11 | Đóng góp | Có đóng góp thực tế vào giao diện hệ thống, tài liệu workshop và một số phần tích hợp kỹ thuật của dự án | ✅ | ☐ | ☐ |
 | 12 | Đánh giá chung | Hoàn thành tốt quá trình thực tập và tích lũy được nhiều kinh nghiệm thực tế | ✅ | ☐ | ☐ |
 
-### Nhìn lại phần công việc đã thực hiện
-
-Trong suốt quá trình thực tập, em đã trực tiếp tham gia xây dựng các phần giao diện chính của hệ thống như **Users, Attendance, Tasks, Analytics/Dashboard, Leaves, Login**, đồng thời xử lý các nội dung liên quan đến **RBAC ở frontend, Private Route, PermissionGuard, tích hợp camera/webcam, upload file qua S3 Presigned URL, Face Liveness và deploy frontend lên S3 + CloudFront**. 
-
-Ngoài phần phát triển giao diện, em còn tham gia hỗ trợ một số công việc mang tính kết nối kỹ thuật như:
-- chuẩn hóa một số workflow nghiệp vụ để thuận tiện cho việc phát triển;
-- cập nhật sơ đồ kiến trúc theo góp ý từ mentor;
-- hỗ trợ đồng bộ naming convention, payload và response giữa frontend/backend;
-- viết 3 bài blog kỹ thuật;
-- hỗ trợ hoàn thiện workshop documentation ở các mục như bảo mật, cơ sở dữ liệu, analytics, monitoring và testing.
 
 ### Cần cải thiện
 

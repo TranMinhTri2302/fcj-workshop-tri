@@ -31,16 +31,6 @@ To reflect on my internship experience more objectively, I would like to assess 
 | 11 | Contribution | Made practical contributions to the system interface, workshop documentation, and several technical integration tasks in the project | ✅ | ☐ | ☐ |
 | 12 | Overall evaluation | Successfully completed the internship and gained valuable hands-on experience | ✅ | ☐ | ☐ |
 
-### Reflection on the work completed
-
-Throughout the internship, I directly contributed to building the main user interfaces of the system, including **Users, Attendance, Tasks, Analytics/Dashboard, Leaves, and Login**, while also handling frontend-related features such as **RBAC, Private Route, PermissionGuard, camera/webcam integration, file uploads via S3 Presigned URL, Face Liveness, and frontend deployment on S3 + CloudFront**.
-
-In addition to frontend development, I also supported several tasks that helped connect the technical parts of the project, such as:
-- standardizing several business workflows to make development more consistent;
-- updating the architecture diagram based on mentor feedback;
-- aligning naming conventions, payloads, and responses between frontend and backend;
-- writing 3 technical blog posts;
-- supporting workshop documentation in areas such as security, database, analytics, monitoring, and testing.
 
 ### Areas for improvement
 
