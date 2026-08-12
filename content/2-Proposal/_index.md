@@ -8,8 +8,8 @@ chapter: false
 
 ## 1. Project Overview
 **Smart Campus Platform** is a comprehensive software system designed to modernize and digitize management task and check-in, check-out, leave requests for employees in at company. The project including automated facial recognition attendance (AI), Task & Attendance Management and Analytics Report, check in check out.
-
-Notably, the system is designed **100% Serverless on the AWS platform**, applying an Event-Driven Microservices architecture to ensure high scalability, low costs, and resilient operations.
+> ![Project Overview](/aws-image/overview/overview1.png)
+Notably, the system is designed **100% Serverless on the AWS platform**, applying an Event-Driven architecture to ensure high scalability, low costs, and resilient operations.
 
 ## 2. Problem Statement
 The system solves painful issues in traditional management:
@@ -29,18 +29,22 @@ The system solves painful issues in traditional management:
 > **[OVERALL ARCHITECTURE DIAGRAM]**
 > ![Architecture Diagram](/aws-image/AwsArchitecture.drawio.png)
 
-The system is designed based on an **Event-Driven Microservices** architecture and utilizes over 15 AWS cloud services. Below are the details of the 6 core business workflows and how AWS services coordinate to solve the problems:
+The system is designed based on an **Event-Driven** architecture and utilizes over 15 AWS cloud services. Below are the details of the 6 core business workflows and how AWS services coordinate to solve the problems:
 
 ### 4.1. Auth & Users Workflow
 - **Business Logic:** Manage the user account lifecycle, assign Role-Based Access Control (RBAC) for Admin, Manager, Staff. Force new users to change their password on first login.
+> ![Workflow 1](/aws-image/overview/overview2.png)
 - **AWS Services:** Use **Amazon Cognito** as the Identity Provider to issue and verify JWT Tokens. The React/Vite Frontend interface is hosted on **Amazon S3** and distributed via **Amazon CloudFront**.
 
 ### 4.2. Face Registration Workflow
 - **Business Logic:** Prevent fraud by ensuring each employee is only allowed to register a single authentic face into the system.
+> ![Workflow 2](/aws-image/overview/overview3.png)
 - **AWS Services:** Call the `IndexFaces` API of **Amazon Rekognition** to extract biometric features and save the FaceID. Original JPEG/PNG images are strictly secured in an **Amazon S3 Private Bucket**.
 
 ### 4.3. Smart Attendance Workflow
-- **Business Logic:** The check-in/check-out process is done by showing a face to the camera. The system automatically matches, checks valid timeframes, and verifies if the employee is using the correct office IP (preventing fake GPS/VPN).
+- **Business Logic:** The check-in process is done by showing a face to the camera. The system automatically matches, checks valid timeframes, and verifies if the employee is using the correct office IP (preventing fake GPS/VPN).
+> ![Workflow 3](/aws-image/overview/overview4.png)
+> ![Workflow 3](/aws-image/overview/overview5.png)
 - **AWS Services:** 
   - **AWS WAF (Web Application Firewall):** Blocks attendance requests originating outside the company network (IP Whitelisting).
   - **Amazon Rekognition:** Calls the `SearchFacesByImage` function to check for a match (Confidence > 95%).
@@ -48,6 +52,8 @@ The system is designed based on an **Event-Driven Microservices** architecture a
 
 ### 4.4. Event-driven Notifications Workflow
 - **Business Logic:** When an employee successfully checks in or is assigned a new task, the system automatically pushes multi-channel notifications to relevant personnel without slowing down the user's experience.
+> ![Workflow 4](/aws-image/overview/overview6.png)
+> ![Workflow 4](/aws-image/overview/overview7.png)
 - **AWS Services:** 
   - **Amazon EventBridge:** Receives events (e.g., `AttendanceRecorded`) and routes them.
   - **Amazon SQS:** Acts as a queue catching events from EventBridge, sending them to the Lambda Background Worker.
@@ -55,6 +61,9 @@ The system is designed based on an **Event-Driven Microservices** architecture a
 
 ### 4.5. Task Management Workflow
 - **Business Logic:** Assign tasks with strict deadlines and process Leave Requests. Management can attach confidential documents to tasks.
+> ![Workflow 5](/aws-image/overview/overview8.png)
+> ![Workflow 5](/aws-image/overview/overview9.png)
+> ![Workflow 5](/aws-image/overview/overview10.png)
 - **AWS Services:**
   - **Amazon DynamoDB:** Stores Tasks and Leaves data structures with Global Secondary Indexes (GSI) for fast querying.
   - **Amazon S3 Pre-signed URL:** Generates dynamic, time-limited links to download confidential attachments, preventing data leaks.
@@ -62,8 +71,10 @@ The system is designed based on an **Event-Driven Microservices** architecture a
 
 ### 4.6. Data Lake Analytics Workflow
 - **Business Logic:** Collect massive attendance logs from campuses, aggregate data so Directors can view Performance Reports (Dashboards) comparing departments.
+> ![Workflow 6](/aws-image/overview/overview1.png)
+> ![Workflow 6](/aws-image/overview/overview11.png)
 - **AWS Services:**
-  - **Amazon Kinesis Data Firehose:** Receives attendance log streams, automatically partitions folders by date (Dynamic Partitioning), and saves large files to the **S3 Data Lake**.
+  
   - **AWS Glue (Data Catalog):** Automatically crawls the schema of JSON files on S3.
   - **Amazon Athena:** Serverless SQL query engine, reading data directly from S3 via Glue Catalog to return high-speed statistical results to the Frontend.
 
@@ -91,7 +102,7 @@ The entire Smart Campus Platform architecture is designed to strictly adhere to 
 1. **Operational Excellence:** Manages the entire application lifecycle automatically using CI/CD scripts (CodeBuild/CodePipeline). Centralized monitoring of logs and event metrics via Amazon CloudWatch to detect bottlenecks early.
 2. **Security:** Enforces the Principle of Least Privilege via specific IAM Roles for each Lambda function. Hides sensitive attachments using S3 Pre-signed URLs, encrypts connections using CloudFront's HTTPS/TLS, and protects the API gateway with AWS WAF combined with Cognito JWT Authorizer.
 3. **Reliability:** Ensures continuous High Availability thanks to the default Multi-AZ architecture of the Serverless ecosystem. Automatic Retry mechanisms and pushing error messages into Amazon SQS's Dead-Letter Queue (DLQ) prevent attendance log loss.
-4. **Performance Efficiency:** Smoothly distributes the static Frontend app via CloudFront Edge locations. Optimizes read/write data times to milliseconds with DynamoDB, while offloading the main OLTP system by pushing large queries to the Data Lake pipeline (Firehose & Athena).
+4. **Performance Efficiency:** Smoothly distributes the static Frontend app via CloudFront Edge locations. Optimizes read/write data times to milliseconds with DynamoDB, while offloading the main OLTP system by pushing large queries to the Data Lake pipeline (Athena).
 5. **Cost Optimization:** Radically applies the 100% Serverless Event-Driven model (only pay when the system is called). Sets S3 Lifecycle Rules to automatically downgrade storage (moving old logs to Glacier), minimizing cold storage costs.
 
 ## 5. Expected Timeline
@@ -103,7 +114,7 @@ The entire Smart Campus Platform architecture is designed to strictly adhere to 
 | **Week 7-8** | Integrate CI/CD (CodeBuild, CodePipeline), Automation Testing, finalize Notification flows (SNS/SES), summary and report writing. |
 
 ## 6. Monthly Budget Estimation
-The budget estimation is calculated based on the actual operating scale of a medium-sized campus: **200 employees, each checking in an average of 1 to 4 times/day** (morning arrival, lunch break, afternoon return, evening departure). In total, the system will process approximately **20,000 attendance checks/month** and about **150,000 API requests/month** (including task assignment, reporting, leaves).
+The budget estimation is calculated based on the actual operating scale of a medium-sized campus: **200 employees, each checking in an average of 1 to 3 times/day**. In total, the system will process approximately **15,000 attendance checks/month** and about **150,000 API requests/month** (including task assignment, reporting, leaves).
 
 To prove the optimization of Serverless, the estimate below is calculated **based on raw pricing (Pay-As-You-Go)** and does not rely on the AWS 12-month Free Tier package.
 
@@ -117,18 +128,18 @@ To prove the optimization of Serverless, the estimate below is calculated **base
 | **Amazon CloudFront** | 20GB Data Transfer Out + 200k HTTPS Requests | $0.09 / GB | **$1.80** |
 | **AWS WAF** | 1 Web ACL + 1 Rule (IP Match) + 150k Requests | $5.00/Web ACL + $1.00/Rule + $0.60/1M Req | **$6.09** |
 | **Amazon Cognito** | Under 1,000 MAU (Monthly Active Users) | Free (Forever under 50,000 MAU) | **$0.00** |
-| **Amazon Rekognition** | 20,000 face matching scans (SearchFacesByImage) | $0.001 / Scan | **$20.00** |
-| **Amazon Firehose & Athena** | ~1GB Data Ingestion & Scanned by Athena query | $0.03/GB Ingestion + $5.00/TB Scanned | **$0.04** |
+| **Amazon Rekognition** | 10,000 face matching scans (SearchFacesByImage) | $0.001 / Scan | **$10.00** |
+| **Amazon Athena** | ~1GB Data Scanned by Athena query | $5.00/TB Scanned | **$0.04** |
 | **Amazon CloudWatch** | 1GB Ingestion Logs + 3 Custom Metrics | $0.57 / GB Logs | **$1.47** |
 | **AWS CodeBuild & CodePipeline** | ~100 build minutes (linux-small) + 1 Active Pipeline | $0.005 / min + $1.00/Pipeline | **$1.50** |
-| **TOTAL** | **Smart Campus Operation Cost (200 Users)** | | **~ $34.48 / month** |
+| **TOTAL** | **Smart Campus Operation Cost (200 Users)** | | **~ $24.48 / month** |
 
 ### 6.1. Cost Optimization Strategies
 Although the baseline operational cost is already very low, the system employs additional in-depth optimization strategies:
 1. **Pure Serverless Pay-As-You-Go Model:** Using AWS Lambda and **API Gateway HTTP API** (71% cheaper than REST API) ensures the system incurs zero server maintenance costs during nights or weekends.
-2. **S3 Lifecycle Rules & Firehose Compression:** Configuring automated attendance log compression to Parquet format via Firehose and moving logs older than 90 days to **S3 Glacier Flexible Retrieval** reduces long-term storage costs by 85%.
-3. **Using SQS Long Polling:** Configuring `ReceiveMessageWaitTimeSeconds = 20` minimizes Empty Receive Requests to SQS, significantly saving API call costs.
-4. **AWS Lambda Power Tuning:** Performing probing for the most optimal RAM level to balance response speed (Latency) and execution cost, ensuring Lambda is not over-provisioned with memory causing waste.
+
+2. **Using SQS Long Polling:** Configuring `ReceiveMessageWaitTimeSeconds = 20` minimizes Empty Receive Requests to SQS, significantly saving API call costs.
+3. **AWS Lambda Power Tuning:** Performing probing for the most optimal RAM level to balance response speed (Latency) and execution cost, ensuring Lambda is not over-provisioned with memory causing waste.
 
 ## 7. Risk Assessment & Mitigations
 
@@ -151,5 +162,5 @@ Upon full deployment, the **Smart Campus** system is expected to achieve the fol
 
 **Business Outcomes:**
 - **Cost Optimization:** Save over **80%** of infrastructure operation costs compared to renting traditional servers (EC2/VPS), thanks to the serverless (Pay-as-you-go) model.
-- **High Maintainability:** The entire architecture is modularized into isolated Microservices (Event-Driven), meaning upgrading or bug fixing one feature won't disrupt the whole system.
+
 - **Superior User Experience:** Fully digitizes paperwork, providing a smart, modern, and transparent work environment for all personnel.

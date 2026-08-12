@@ -9,8 +9,8 @@ chapter: false
 ## 1. Tổng quan dự án (Project Overview)
 **Smart Campus Platform** là một hệ thống phần mềm toàn diện nhằm hiện đại hóa và số hóa quy trình quản lý công việc và điểm danh. Dự án bao gồm tự động hóa điểm danh bằng khuôn mặt, quản lý công việc, điểm danh và thống kê công việc, điểm danh của nhân viên.
 
-Đặc biệt, hệ thống được thiết kế **100% Serverless trên nền tảng AWS**, áp dụng kiến trúc Event-Driven Microservices để đảm bảo tính mở rộng cao, chi phí thấp và khả năng vận hành bền bỉ.
-
+Đặc biệt, hệ thống được thiết kế **100% Serverless trên nền tảng AWS**, áp dụng kiến trúc Event-Driven  để đảm bảo tính mở rộng cao, chi phí thấp và khả năng vận hành bền bỉ.
+> ![Project Overview](/aws-image/overview/overview1.png)
 ## 2. Vấn đề cần giải quyết (Problem Statement)
 Hệ thống giải quyết các bài toán nhức nhối trong quản lý truyền thống:
 - **Điểm danh thủ công & gian lận:** Việc sử dụng thẻ từ hay vân tay dễ bị lách luật, quên thẻ, hoặc chậm trễ vào giờ cao điểm.
@@ -29,18 +29,22 @@ Hệ thống giải quyết các bài toán nhức nhối trong quản lý truy�
 > **[SƠ ĐỒ KIẾN TRÚC TỔNG THỂ]**
 > ![Sơ đồ kiến trúc](/aws-image/AwsArchitecture.drawio.png)
 
-Hệ thống được thiết kế dựa trên kiến trúc **Event-Driven Microservices** và ứng dụng hơn 15 dịch vụ đám mây của AWS. Dưới đây là chi tiết 6 luồng nghiệp vụ cốt lõi và cách các dịch vụ AWS phối hợp giải quyết bài toán:
+Hệ thống được thiết kế dựa trên kiến trúc **Event-Driven ** và ứng dụng hơn 15 dịch vụ đám mây của AWS. Dưới đây là chi tiết 6 luồng nghiệp vụ cốt lõi và cách các dịch vụ AWS phối hợp giải quyết bài toán:
 
 ### 4.1. Luồng Xác thực & Phân quyền (Auth & Users Workflow)
 - **Nghiệp vụ:** Quản lý vòng đời tài khoản người dùng, phân quyền Role-Based Access Control (RBAC) cho Admin, Manager, Staff. Bắt buộc người dùng mới phải đổi mật khẩu ở lần đăng nhập đầu tiên.
+> ![Workflow 1](/aws-image/overview/overview2.png)
 - **Dịch vụ AWS:** Sử dụng **Amazon Cognito** làm Identity Provider để cấp phát và xác thực JWT Token. Giao diện Frontend React/Vite được lưu trữ trên **Amazon S3** và phân phối qua **Amazon CloudFront**.
 
 ### 4.2. Luồng Đăng ký Khuôn mặt (Face Registration Workflow)
 - **Nghiệp vụ:** Chống gian lận bằng cách mỗi nhân viên chỉ được phép đăng ký duy nhất 1 khuôn mặt chính chủ vào hệ thống.
+> ![Workflow 2](/aws-image/overview/overview3.png)
 - **Dịch vụ AWS:** Gọi API `IndexFaces` của **Amazon Rekognition** để trích xuất đặc trưng sinh trắc học và lưu FaceID. Hình ảnh gốc định dạng JPEG/PNG được bảo mật tuyệt đối trong **Amazon S3 Private Bucket**.
 
 ### 4.3. Luồng Điểm danh Thông minh (Smart Attendance Workflow)
-- **Nghiệp vụ:** Quá trình check-in/check-out được thực hiện bằng cách đưa khuôn mặt qua camera. Hệ thống tự động so khớp, kiểm tra khung giờ hợp lệ, và đối chiếu xem nhân viên có đang sử dụng đúng IP của văn phòng hay không (chống fake GPS/VPN).
+- **Nghiệp vụ:** Quá trình check-in được thực hiện bằng cách đưa khuôn mặt qua camera. Hệ thống tự động so khớp, kiểm tra khung giờ hợp lệ, và đối chiếu xem nhân viên có đang sử dụng đúng IP của văn phòng hay không (chống fake GPS/VPN).
+> ![Workflow 3](/aws-image/overview/overview4.png)
+> ![Workflow 3](/aws-image/overview/overview5.png)
 - **Dịch vụ AWS:** 
   - **AWS WAF (Web Application Firewall):** Chặn các request điểm danh đến từ ngoài mạng công ty (IP Whitelisting).
   - **Amazon Rekognition:** Gọi hàm `SearchFacesByImage` để đối chiếu độ trùng khớp (Confidence > 95%).
@@ -48,6 +52,8 @@ Hệ thống được thiết kế dựa trên kiến trúc **Event-Driven Micro
 
 ### 4.4. Luồng Xử lý Sự kiện & Thông báo (Event-driven Notifications)
 - **Nghiệp vụ:** Khi một nhân viên điểm danh thành công hoặc bị giao việc mới, hệ thống tự động đẩy thông báo đa kênh cho người liên quan mà không làm chậm trải nghiệm của người dùng.
+> ![Workflow 4](/aws-image/overview/overview6.png)
+> ![Workflow 4](/aws-image/overview/overview7.png)
 - **Dịch vụ AWS:** 
   - **Amazon EventBridge:** Nhận sự kiện (ví dụ `AttendanceRecorded`) và phân luồng (Routing).
   - **Amazon SQS:** Làm hàng đợi hứng sự kiện từ EventBridge, gửi cho Lambda Background Worker.
@@ -55,6 +61,10 @@ Hệ thống được thiết kế dựa trên kiến trúc **Event-Driven Micro
 
 ### 4.5. Luồng Quản lý Công việc (Task Management Workflow)
 - **Nghiệp vụ:** Phân công công việc (Task) với thời hạn nghiêm ngặt (Deadline) và xử lý quy trình xin nghỉ phép (Leave Request). Quản lý có thể đính kèm tài liệu mật vào task.
+> ![Workflow 5](/aws-image/overview/overview8.png)
+> ![Workflow 5](/aws-image/overview/overview9.png)
+> ![Workflow 5](/aws-image/overview/overview10.png)
+
 - **Dịch vụ AWS:**
   - **Amazon DynamoDB:** Lưu cấu trúc dữ liệu Tasks và Leaves với các Global Secondary Index (GSI) để truy vấn nhanh.
   - **Amazon S3 Pre-signed URL:** Sinh link động có thời hạn để tải tài liệu mật đính kèm, ngăn chặn rò rỉ dữ liệu.
@@ -62,8 +72,9 @@ Hệ thống được thiết kế dựa trên kiến trúc **Event-Driven Micro
 
 ### 4.6. Luồng Phân tích Dữ liệu lớn (Data Lake Analytics Workflow)
 - **Nghiệp vụ:** Thu thập log điểm danh khổng lồ từ các khuôn viên, gom nhóm dữ liệu để Giám đốc có thể xem Báo cáo hiệu suất (Dashboard) so sánh giữa các phòng ban.
+> ![Workflow 6](/aws-image/overview/overview1.png)
+> ![Workflow 6](/aws-image/overview/overview11.png)
 - **Dịch vụ AWS:**
-  - **Amazon Kinesis Data Firehose:** Nhận stream log điểm danh, tự động chia folder theo ngày tháng (Dynamic Partitioning) và lưu thành file lớn xuống **S3 Data Lake**.
   - **AWS Glue (Data Catalog):** Tự động thu thập cấu trúc (Schema) của các file JSON trên S3.
   - **Amazon Athena:** Động cơ truy vấn SQL Serverless, đọc trực tiếp dữ liệu từ S3 qua Glue Catalog để trả về kết quả thống kê siêu tốc cho Frontend.
 
@@ -92,7 +103,7 @@ Toàn bộ kiến trúc của Smart Campus Platform được thiết kế tuân 
 1. **Operational Excellence (Vận hành xuất sắc):** Quản lý toàn bộ vòng đời ứng dụng tự động bằng kịch bản CI/CD (CodeBuild/CodePipeline). Giám sát tập trung log và các luồng sự kiện (event metrics) qua Amazon CloudWatch để phát hiện sớm điểm nghẽn.
 2. **Security (Bảo mật):** Thực thi nguyên tắc Đặc quyền tối thiểu (Least Privilege) qua các IAM Roles cụ thể cho từng hàm Lambda. Ẩn tài liệu đính kèm nhạy cảm bằng S3 Pre-signed URL, mã hóa kết nối bằng HTTPS/TLS của CloudFront, và bảo vệ cổng API bằng AWS WAF kết hợp Cognito JWT Authorizer.
 3. **Reliability (Độ tin cậy):** Đảm bảo tính khả dụng (High Availability) liên tục nhờ kiến trúc Multi-AZ mặc định của hệ sinh thái Serverless. Cơ chế Retry tự động và đẩy tin nhắn lỗi vào Dead-Letter Queue (DLQ) của Amazon SQS giúp ngăn ngừa mất mát log điểm danh.
-4. **Performance Efficiency (Hiệu năng):** Phân phối ứng dụng Frontend tĩnh mượt mà qua các Edge locations của CloudFront. Tối ưu thời gian đọc/ghi dữ liệu ở mức mili-giây với DynamoDB, đồng thời giải tải cho hệ thống OLTP chính bằng cách đẩy dữ liệu truy vấn lớn sang luồng Data Lake (Firehose & Athena).
+4. **Performance Efficiency (Hiệu năng):** Phân phối ứng dụng Frontend tĩnh mượt mà qua các Edge locations của CloudFront. Tối ưu thời gian đọc/ghi dữ liệu ở mức mili-giây với DynamoDB, đồng thời giải tải cho hệ thống OLTP chính bằng cách đẩy dữ liệu truy vấn lớn sang luồng Data Lake (Athena).
 5. **Cost Optimization (Tối ưu chi phí):** Áp dụng triệt để mô hình 100% Serverless Event-Driven (chỉ trả tiền khi hệ thống được gọi). Thiết lập S3 Lifecycle Rules để tự động hạ tầng lưu trữ (chuyển log cũ sang Glacier), tối thiểu hóa chi phí lưu trữ lạnh.
 
 ## 5. Timeline dự kiến
@@ -104,7 +115,7 @@ Toàn bộ kiến trúc của Smart Campus Platform được thiết kế tuân 
 | **Tuần 7-8** | Tích hợp CI/CD (CodeBuild, CodePipeline), Automation Testing, hoàn thiện luồng Gửi thông báo (SNS/SES), tổng kết và viết báo cáo. |
 
 ## 6. Ước Tính Ngân Sách Hàng Tháng (Monthly Budget Estimation)
-Dự toán ngân sách được tính dựa trên quy mô vận hành thực tế tại 1 khuôn viên vừa: **200 nhân viên, mỗi người điểm danh trung bình từ 1 đến 4 lượt/ngày** (sáng đến, trưa đi ăn, chiều quay lại, tối về). Tổng cộng hệ thống sẽ xử lý khoảng **20.000 lượt điểm danh/tháng** và khoảng **150.000 API requests/tháng** (bao gồm cả giao việc, báo cáo, nghỉ phép).
+Dự toán ngân sách được tính dựa trên quy mô vận hành thực tế tại 1 khuôn viên vừa: **200 nhân viên, mỗi người điểm danh trung bình từ 1 đến 3 lượt/ngày**. Tổng cộng hệ thống sẽ xử lý khoảng **15.000 lượt điểm danh/tháng** và khoảng **150.000 API requests/tháng** (bao gồm cả giao việc, báo cáo, nghỉ phép).
 
 Để chứng minh tính tối ưu của Serverless, dự toán dưới đây được tính **dựa trên đơn giá gốc (Pay-As-You-Go)** mà không phụ thuộc vào gói Free Tier 12 tháng của AWS.
 
@@ -118,18 +129,17 @@ Dự toán ngân sách được tính dựa trên quy mô vận hành thực t�
 | **Amazon CloudFront** | 20GB Data Transfer Out + 200k HTTPS Requests | $0.09 / GB | **$1.80** |
 | **AWS WAF** | 1 Web ACL + 1 Rule (IP Match) + 150k Requests | $5.00/Web ACL + $1.00/Rule + $0.60/1M Req | **$6.09** |
 | **Amazon Cognito** | Dưới 1,000 MAU (Monthly Active Users) | Miễn phí (Dưới 50,000 MAU vĩnh viễn) | **$0.00** |
-| **Amazon Rekognition** | 20,000 lần quét ảnh đối chiếu khuôn mặt (SearchFacesByImage) | $0.001 / Ảnh quét | **$20.00** |
-| **Amazon Firehose & Athena** | ~1GB Data Ingestion & Scanned by Athena query | $0.03/GB Ingestion + $5.00/TB Scanned | **$0.04** |
+| **Amazon Rekognition** | 15,000 lần quét ảnh đối chiếu khuôn mặt (SearchFacesByImage) | $0.001 / Ảnh quét | **$15.00** |
+| **Amazon Athena** | ~1GB Data Scanned by Athena query | $5.00/TB Scanned | **$0.04** |
 | **Amazon CloudWatch** | 1GB Ingestion Logs + 3 Custom Metrics | $0.57 / GB Logs | **$1.47** |
 | **AWS CodeBuild & CodePipeline** | ~100 phút build (linux-small) + 1 Active Pipeline | $0.005 / phút + $1.00/Pipeline | **$1.50** |
-| **TỔNG CỘNG** | **Chi phí vận hành mô hình Smart Campus (200 Users)** | | **~ $34.48 / tháng** |
+| **TỔNG CỘNG** | **Chi phí vận hành mô hình Smart Campus (200 Users)** | | **~ $24.48 / tháng** |
 
 ### 6.1. Chiến Lược Tối Ưu Chi Phí
 Mặc dù chi phí vận hành cơ bản đã rất thấp, hệ thống vẫn áp dụng thêm các chiến lược tối ưu chuyên sâu:
 1. **Mô hình Pure Serverless Pay-As-You-Go:** Sử dụng AWS Lambda và **API Gateway HTTP API** (rẻ hơn 71% so với REST API) giúp hệ thống không tốn bất kỳ chi phí duy trì máy chủ nào trong khung giờ ban đêm hoặc cuối tuần.
-2. **S3 Lifecycle Rules & Firehose Compression:** Cấu hình tự động nén log điểm danh thành định dạng Parquet qua Firehose và chuyển các log cũ hơn 90 ngày sang **S3 Glacier Flexible Retrieval** giúp giảm 85% chi phí lưu trữ dài hạn.
-3. **Sử dụng SQS Long Polling:** Cấu hình `ReceiveMessageWaitTimeSeconds = 20` giúp giảm thiểu lượng request rỗng (Empty Receive Requests) tới SQS, tiết kiệm đáng kể chi phí gọi API.
-4. **AWS Lambda Power Tuning:** Thực hiện dò tìm mức RAM tối ưu nhất để cân bằng giữa tốc độ phản hồi (Latency) và chi phí thực thi, đảm bảo Lambda không bị cấp dư thừa bộ nhớ gây lãng phí.
+2. **Sử dụng SQS Long Polling:** Cấu hình `ReceiveMessageWaitTimeSeconds = 20` giúp giảm thiểu lượng request rỗng (Empty Receive Requests) tới SQS, tiết kiệm đáng kể chi phí gọi API.
+3. **AWS Lambda Power Tuning:** Thực hiện dò tìm mức RAM tối ưu nhất để cân bằng giữa tốc độ phản hồi (Latency) và chi phí thực thi, đảm bảo Lambda không bị cấp dư thừa bộ nhớ gây lãng phí.
 
 ## 7. Đánh giá Rủi ro & Biện pháp giảm thiểu (Risks & Mitigations)
 
@@ -152,5 +162,5 @@ Sau khi hoàn thành triển khai, hệ thống **Smart Campus** dự kiến đ�
 
 **Giá Trị Vận Hành & Kinh Doanh (Business Outcomes):**
 - **Tối ưu chi phí:** Tiết kiệm hơn **80%** chi phí vận hành hạ tầng so với việc thuê máy chủ truyền thống (EC2/VPS), nhờ mô hình không dùng máy chủ (Pay-as-you-go).
-- **Khả năng bảo trì cao:** Toàn bộ kiến trúc được module hóa thành các Microservices tách biệt (Event-Driven), giúp việc nâng cấp hay sửa lỗi một tính năng không làm gián đoạn toàn bộ hệ thống.
+
 - **Trải nghiệm người dùng vượt trội:** Số hóa hoàn toàn thủ tục giấy tờ, cung cấp môi trường làm việc thông minh, hiện đại và minh bạch cho toàn bộ nhân sự.
