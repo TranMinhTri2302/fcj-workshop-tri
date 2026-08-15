@@ -3,7 +3,7 @@ title: "AWS FCAJ Agent Forge - Hands-on AgentCore (Deepdive day 3)"
 date: 2026-08-15
 weight: 4
 chapter: false
-pre: " <b> 4.3. </b> "
+pre: " <b> 4.4. </b> "
 ---
 
 # Báo cáo tóm tắt: "AWS FCAJ Agent Forge - Hands-on AgentCore (Buổi 3)"
