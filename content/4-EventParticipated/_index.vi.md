@@ -38,7 +38,7 @@ Trong quá trình thực tập, em đã tham gia 4 events, mỗi event đều ma
 
 &emsp;**Vai trò trong sự kiện:** Người tham dự 
 
-### [Event 4](4.3-Event4/)
+### [Event 4](4.4-Event4/)
 &emsp;**Tên sự kiện:** AWS FCAJ Agent Forge - Hands-on AgentCore (Deepdive day 3)
 
 &emsp;**Thời gian:** 09:00 ngày 15/08/2026
