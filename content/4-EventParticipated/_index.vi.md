@@ -38,3 +38,12 @@ Trong quá trình thực tập, em đã tham gia 3 events, mỗi event đều ma
 
 &emsp;**Vai trò trong sự kiện:** Người tham dự 
 
+### [Event 4](4.3-Event4/)
+&emsp;**Tên sự kiện:** AWS FCAJ Agent Forge - Hands-on AgentCore (Deepdive day 3)
+
+&emsp;**Thời gian:** 09:00 ngày 15/08/2026
+
+&emsp;**Địa điểm:** Tầng 26, tòa nhà Bitexco, số 02 đường Hải Triều, phường Sài Gòn, thành phố Hồ Chí Minh
+
+&emsp;**Vai trò trong sự kiện:** Người tham dự 
+

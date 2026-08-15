@@ -120,19 +120,19 @@ To prove the optimization of Serverless, the estimate below is calculated **base
 
 | AWS SERVICE | EXPECTED MONTHLY USAGE | REFERENCE PRICE (AP-SOUTHEAST-1) | MONTHLY COST (USD) |
 | :--- | :--- | :--- | :---: |
-| **AWS Lambda** | 150,000 API Requests + 40,000 Worker executions (Memory: 512MB, Avg: 1s) | $0.20 / 1M Requests + Compute time | **$1.62** |
-| **Amazon API Gateway** | 150,000 HTTP API calls | $1.00 / 1M Requests | **$0.15** |
+| **AWS Lambda** | 150,000 API Requests + 40,000 Worker executions (Memory: 512MB, Avg: 1s) | $0.20 / 1M Requests + $0.0000166667 | **$1.37** |
+| **Amazon API Gateway** | 150,000 HTTP API calls | $1.25 / 1M Requests | **$0.19** |
 | **Amazon SQS** | 50,000 SQS Requests (Send & Receive) | $0.40 / 1M Requests | **$0.02** |
 | **Amazon DynamoDB** | 500,000 WCU, 500,000 RCU (On-Demand Mode) + 2GB Storage | $1.25 / 1M WCU, $0.25 / 1M RCU + $0.25/GB | **$1.26** |
-| **Amazon S3** | ~5GB Storage (Frontend, Images, Data Lake) + 100k GET/PUT | $0.025 / GB Storage + $0.004 / 1k PUT | **$0.53** |
-| **Amazon CloudFront** | 20GB Data Transfer Out + 200k HTTPS Requests | $0.09 / GB | **$1.80** |
+| **Amazon S3** | ~5GB Storage (Frontend, Images, Data Lake) + 100k GET/PUT | $0.025 / GB Storage + $0.005 / 1k PUT | **$0.625** |
+| **Amazon CloudFront** | 20GB Data Transfer Out + 200k HTTPS Requests | $0.120 / GB + $0.012 / 10k Req | **$2.64** |
 | **AWS WAF** | 1 Web ACL + 1 Rule (IP Match) + 150k Requests | $5.00/Web ACL + $1.00/Rule + $0.60/1M Req | **$6.09** |
 | **Amazon Cognito** | Under 1,000 MAU (Monthly Active Users) | Free (Forever under 50,000 MAU) | **$0.00** |
-| **Amazon Rekognition** | 10,000 face matching scans (SearchFacesByImage) | $0.001 / Scan | **$10.00** |
-| **Amazon Athena** | ~1GB Data Scanned by Athena query | $5.00/TB Scanned | **$0.04** |
+| **Amazon Rekognition** | 15,000 face matching scans (SearchFacesByImage) | $0.001 / Scan | **$15.00** |
+| **Amazon Athena** | ~1GB Data Scanned by Athena query | $5.00/TB Scanned | **$0.05** |
 | **Amazon CloudWatch** | 1GB Ingestion Logs + 3 Custom Metrics | $0.57 / GB Logs | **$1.47** |
 | **AWS CodeBuild & CodePipeline** | ~100 build minutes (linux-small) + 1 Active Pipeline | $0.005 / min + $1.00/Pipeline | **$1.50** |
-| **TOTAL** | **Smart Campus Operation Cost (200 Users)** | | **~ $24.48 / month** |
+| **TOTAL** | **Smart Campus Operation Cost (200 Users)** | | **~ $30.22 / month** |
 
 ### 6.1. Cost Optimization Strategies
 Although the baseline operational cost is already very low, the system employs additional in-depth optimization strategies:

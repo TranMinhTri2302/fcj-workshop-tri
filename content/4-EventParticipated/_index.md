@@ -37,3 +37,12 @@ During my internship, I participated in three events. Each one was a memorable e
 &emsp;**Location:** 26th Floor, Bitexco Tower, 02 Hai Trieu Street, Saigon Ward, Ho Chi Minh City  
 
 &emsp;**Role:** Attendee  
+
+### [Event 4](4.4-Event4/)  
+&emsp;**Event Name:** AWS FCAJ Agent Forge - Hands-on AgentCore (Deepdive day 3)
+
+&emsp;**Date & Time:** 09:00 AM, August 15, 2026
+
+&emsp;**Location:** 26th Floor, Bitexco Tower, 02 Hai Trieu Street, Saigon Ward, Ho Chi Minh City  
+
+&emsp;**Role:** Attendee  

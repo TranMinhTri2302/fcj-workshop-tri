@@ -364,6 +364,5 @@ Các anh chịu trách nhiệm tổ chức sự kiện rất quan tâm và hiể
 ![Event 3-3](/images/4-EventParticipated/EV3-3.png)
 ![Event 3-4](/images/4-EventParticipated/EV3-4.png)
 ![Event 3-5](/images/4-EventParticipated/EV3-5.png)
-![Event 3-6](/images/4-EventParticipated/EV3-6.png)
 
 > Nhìn chung, session này bổ sung đúng mảnh ghép còn thiếu sau buổi Deepdive trước: nếu buổi trước cho mình biết **Agent được xây bằng gì**, thì buổi này cho mình biết **làm sao để nó sống được ngoài thực tế**. Memory quyết định Agent thông minh tới đâu, Observability quyết định mình có kiểm soát được nó không, Evaluation quyết định mình có biết nó tốt hay dở không, và Security quyết định nó có gây họa hay không. Thiếu bất kỳ mảnh nào trong bốn mảnh đó, Agent vẫn chỉ là một bản demo đẹp mắt chứ chưa phải một sản phẩm.

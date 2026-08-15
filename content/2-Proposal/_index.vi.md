@@ -121,19 +121,19 @@ Dự toán ngân sách được tính dựa trên quy mô vận hành thực t�
 
 | DỊCH VỤ AWS | MỨC ĐỘ SỬ DỤNG DỰ KIẾN / THÁNG | ĐƠN GIÁ THAM KHẢO (AP-SOUTHEAST-1) | CHI PHÍ HÀNG THÁNG (USD) |
 | :--- | :--- | :--- | :---: |
-| **AWS Lambda** | 150,000 API Requests + 40,000 Worker executions (Memory: 512MB, Avg: 1s) | $0.20 / 1M Requests + Compute time | **$1.62** |
-| **Amazon API Gateway** | 150,000 HTTP API calls | $1.00 / 1M Requests | **$0.15** |
+| **AWS Lambda** | 150,000 API Requests + 40,000 Worker executions (Memory: 512MB, Avg: 1s) | $0.20 / 1M Requests + $0.0000166667 | **$1.37** |
+| **Amazon API Gateway** | 150,000 HTTP API calls | $1.25 / 1M Requests | **~$0.19** |
 | **Amazon SQS** | 50,000 SQS Requests (Send & Receive) | $0.40 / 1M Requests | **$0.02** |
 | **Amazon DynamoDB** | 500,000 WCU, 500,000 RCU (On-Demand Mode) + 2GB Storage | $1.25 / 1M WCU, $0.25 / 1M RCU + $0.25/GB | **$1.26** |
-| **Amazon S3** | ~5GB Storage (Frontend, Hình ảnh, Data Lake) + 100k GET/PUT | $0.025 / GB Storage + $0.004 / 1k PUT | **$0.53** |
-| **Amazon CloudFront** | 20GB Data Transfer Out + 200k HTTPS Requests | $0.09 / GB | **$1.80** |
+| **Amazon S3** | ~5GB Storage (Frontend, Hình ảnh, Data Lake) + 100k GET/PUT | $0.025 / GB Storage + $0.005 / 1k PUT | **$0.625** |
+| **Amazon CloudFront** | 20GB Data Transfer Out + 200k HTTPS Requests | $0.120 / GB + $0.012 / 10k Req | **$2.64** |
 | **AWS WAF** | 1 Web ACL + 1 Rule (IP Match) + 150k Requests | $5.00/Web ACL + $1.00/Rule + $0.60/1M Req | **$6.09** |
 | **Amazon Cognito** | Dưới 1,000 MAU (Monthly Active Users) | Miễn phí (Dưới 50,000 MAU vĩnh viễn) | **$0.00** |
 | **Amazon Rekognition** | 15,000 lần quét ảnh đối chiếu khuôn mặt (SearchFacesByImage) | $0.001 / Ảnh quét | **$15.00** |
-| **Amazon Athena** | ~1GB Data Scanned by Athena query | $5.00/TB Scanned | **$0.04** |
+| **Amazon Athena** | ~1GB Data Scanned by Athena query | $5.00/TB Scanned | **$0.05** |
 | **Amazon CloudWatch** | 1GB Ingestion Logs + 3 Custom Metrics | $0.57 / GB Logs | **$1.47** |
 | **AWS CodeBuild & CodePipeline** | ~100 phút build (linux-small) + 1 Active Pipeline | $0.005 / phút + $1.00/Pipeline | **$1.50** |
-| **TỔNG CỘNG** | **Chi phí vận hành mô hình Smart Campus (200 Users)** | | **~ $24.48 / tháng** |
+| **TỔNG CỘNG** | **Chi phí vận hành mô hình Smart Campus (200 Users)** | | **~ $30.22 / tháng** |
 
 ### 6.1. Chiến Lược Tối Ưu Chi Phí
 Mặc dù chi phí vận hành cơ bản đã rất thấp, hệ thống vẫn áp dụng thêm các chiến lược tối ưu chuyên sâu:

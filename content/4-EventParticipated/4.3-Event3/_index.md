@@ -365,6 +365,5 @@ The organizing team was incredibly thoughtful. Understanding that many attendees
 ![Event 3-3](/images/4-EventParticipated/EV3-3.png)
 ![Event 3-4](/images/4-EventParticipated/EV3-4.png)
 ![Event 3-5](/images/4-EventParticipated/EV3-5.png)
-![Event 3-6](/images/4-EventParticipated/EV3-6.png)
 
 > Overall, this session filled the missing puzzle piece from the previous Deepdive: if that session explained **what Agents are made of**, this one showed **how to make them survive in the real world**. Memory determines how intelligent Agents become; Observability determines whether you maintain control; Evaluation determines if you know quality or just assume it; Security determines whether Agents cause harm. Missing any single piece, and Agents remain impressive demos rather than actual products.
