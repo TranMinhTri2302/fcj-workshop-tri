@@ -9,7 +9,7 @@ pre: " <b> 4. </b> "
 
 
 
-During my internship, I participated in three events. Each one was a memorable experience that provided new, interesting, and useful knowledge, along with wonderful moments.
+During my internship, I participated in four events. Each one was a memorable experience that provided new, interesting, and useful knowledge, along with wonderful moments.
 
 ### [Event 1](4.1-Event1/)  
 &emsp;**Event Name:** FCAJ Community Day - June 2026  

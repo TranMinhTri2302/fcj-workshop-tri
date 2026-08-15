@@ -9,7 +9,7 @@ pre: " <b> 4. </b> "
 
 
 
-Trong quá trình thực tập, em đã tham gia 3 events, mỗi event đều mang lại trải nghiệm đáng nhớ và những kiến thức mới, hữu ích. Cụ thể:
+Trong quá trình thực tập, em đã tham gia 4 events, mỗi event đều mang lại trải nghiệm đáng nhớ và những kiến thức mới, hữu ích. Cụ thể:
 
 ### [Event 1](4.1-Event1/)
 &emsp;**Tên sự kiện:** FCAJ Community Day - June 2026
